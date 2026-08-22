@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vietlott AI Predictor & Analytics Pro Ultra</title>
     
-    <!-- PWA Link Manifest & Icons cho Android / iOS -->
+    <!-- PWA Link Manifest & Icons -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
     <link rel="apple-touch-icon" sizes="512x512" href="icon.png">
@@ -137,7 +137,7 @@
                         <i data-lucide="sliders" class="w-5 h-5 text-red-500"></i> Bảng điều khiển tạo số
                     </h2>
 
-                    <!-- Game Selection -->
+                    <!-- 1. Game Selection -->
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Loại hình xổ số</label>
                         <select id="game-type" onchange="initApp()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none text-amber-400">
@@ -150,7 +150,7 @@
                         </select>
                     </div>
 
-                    <!-- Algorithm Selection -->
+                    <!-- 2. Algorithm Selection -->
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Thuật toán phân tích xu hướng</label>
                         <select id="algo-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none">
@@ -161,28 +161,23 @@
                         </select>
                     </div>
 
-                    <!-- Number of Sets (Mặc định bắt đầu từ 1) -->
+                    <!-- 3. Number of Sets (Số lượng bộ số dự đoán) -->
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Số lượng bộ số dự đoán</label>
                         <input type="number" id="ticket-count" value="1" min="1" max="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none">
                     </div>
 
-                    <!-- Action Button -->
-                    <button onclick="generatePredictions()" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 hover:from-red-500 hover:to-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2">
-                        <i data-lucide="sparkles" class="w-5 h-5"></i> CHẠY AI DỰ ĐOÁN
-                    </button>
-
-                    <!-- Predictions Output Panel (Nằm giữa Số lượng bộ số và Jackpot Meter) -->
-                    <div class="pt-4 border-t border-slate-700/80 space-y-3">
+                    <!-- 4. Predictions Output Panel (Khung bộ số gợi ý tối ưu) -->
+                    <div class="pt-2 space-y-3">
                         <h3 class="text-sm font-bold flex items-center gap-2 text-amber-400">
                             <i data-lucide="award" class="w-4 h-4"></i> Bộ số gợi ý tối ưu
                         </h3>
                         <div id="predictions-container" class="space-y-3">
-                            <div class="text-sm text-slate-400 italic text-center py-4">Nhấn "CHẠY AI DỰ ĐOÁN" để khởi tạo bộ số.</div>
+                            <div class="text-sm text-slate-400 italic text-center py-4">Nhấn "CHẠY AI DỰ ĐOÁN" bên dưới để khởi tạo bộ số.</div>
                         </div>
                     </div>
 
-                    <!-- JACKPOT METER -->
+                    <!-- 5. JACKPOT METER -->
                     <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-5 rounded-xl space-y-3.5 relative overflow-hidden">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
@@ -212,6 +207,11 @@
                             Thuật toán dự báo độ "chín" dựa trên thống kê chu kỳ quay và giá trị tích lũy.
                         </p>
                     </div>
+
+                    <!-- 6. Action Button (Nút chạy AI dự đoán nằm ở cuối cùng) -->
+                    <button onclick="generatePredictions()" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 hover:from-red-500 hover:to-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i> CHẠY AI DỰ ĐOÁN
+                    </button>
                 </div>
             </div>
 
