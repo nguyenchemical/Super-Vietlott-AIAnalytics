@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vietlott AI Predictor & Analytics Pro Ultra</title>
     
-    <!-- PWA & App Icons -->
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
+    <!-- PWA Link Manifest & Icons cho Android / iOS -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="icon.png">
     <meta name="apple-mobile-web-app-title" content="Vietlott AI">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -166,6 +167,21 @@
                         <input type="number" id="ticket-count" value="1" min="1" max="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none">
                     </div>
 
+                    <!-- Action Button -->
+                    <button onclick="generatePredictions()" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 hover:from-red-500 hover:to-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i> CHẠY AI DỰ ĐOÁN
+                    </button>
+
+                    <!-- Predictions Output Panel (Nằm giữa Số lượng bộ số và Jackpot Meter) -->
+                    <div class="pt-4 border-t border-slate-700/80 space-y-3">
+                        <h3 class="text-sm font-bold flex items-center gap-2 text-amber-400">
+                            <i data-lucide="award" class="w-4 h-4"></i> Bộ số gợi ý tối ưu
+                        </h3>
+                        <div id="predictions-container" class="space-y-3">
+                            <div class="text-sm text-slate-400 italic text-center py-4">Nhấn "CHẠY AI DỰ ĐOÁN" để khởi tạo bộ số.</div>
+                        </div>
+                    </div>
+
                     <!-- JACKPOT METER -->
                     <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-5 rounded-xl space-y-3.5 relative overflow-hidden">
                         <div class="flex justify-between items-center">
@@ -195,22 +211,6 @@
                         <p id="meter-desc" class="text-[11px] text-slate-400 italic">
                             Thuật toán dự báo độ "chín" dựa trên thống kê chu kỳ quay và giá trị tích lũy.
                         </p>
-                    </div>
-
-                    <!-- Action Button -->
-                    <button onclick="generatePredictions()" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 hover:from-red-500 hover:to-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2">
-                        <i data-lucide="sparkles" class="w-5 h-5"></i> CHẠY AI DỰ ĐOÁN
-                    </button>
-                </div>
-
-                <!-- Predictions Output Panel -->
-                <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl shadow-xl space-y-4">
-                    <h2 class="text-lg font-bold flex items-center gap-2 text-slate-100">
-                        <i data-lucide="award" class="w-5 h-5 text-amber-400"></i> Bộ số gợi ý tối ưu
-                    </h2>
-
-                    <div id="predictions-container" class="space-y-3">
-                        <div class="text-sm text-slate-400 italic text-center py-6">Nhấn "CHẠY AI DỰ ĐOÁN" để khởi tạo bộ số.</div>
                     </div>
                 </div>
             </div>
@@ -265,7 +265,6 @@
 
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // Tính lịch quay chuẩn xác của Vietlott
         function getNextDrawTime(gameType) {
             const now = new Date();
 
@@ -284,11 +283,11 @@
 
             let allowedDays = [];
             if (gameType === 'power655' || gameType === 'max3dpro') {
-                allowedDays = [2, 4, 6]; // Thứ 3, Thứ 5, Thứ 7
+                allowedDays = [2, 4, 6];
             } else if (gameType === 'mega645' || gameType === 'max3dplus') {
-                allowedDays = [0, 3, 5]; // Chủ Nhật, Thứ 4, Thứ 6
+                allowedDays = [0, 3, 5];
             } else if (gameType === 'max3d') {
-                allowedDays = [1, 3, 5]; // Thứ 2, Thứ 4, Thứ 6
+                allowedDays = [1, 3, 5];
             }
 
             let targetDate = new Date(now);
@@ -579,10 +578,10 @@
                 }
 
                 const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-700/80 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 shadow-md";
+                card.className = "bg-slate-900 border border-slate-700/80 p-3 rounded-xl flex flex-wrap items-center justify-between gap-3 shadow-md";
                 card.innerHTML = `
-                    <span class="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded">Bộ #${index + 1}</span>
-                    <div class="flex items-center gap-2">${ballsHtml}</div>
+                    <span class="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">Bộ #${index + 1}</span>
+                    <div class="flex items-center gap-1.5">${ballsHtml}</div>
                 `;
                 container.appendChild(card);
             });
