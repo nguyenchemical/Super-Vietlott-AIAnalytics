@@ -123,26 +123,6 @@
             </div>
         </div>
 
-        <!-- Top Metrics -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div class="bg-slate-800/60 border border-slate-700/60 p-4 rounded-xl">
-                <p class="text-xs text-slate-400 font-medium">Tổng số kỳ phân tích</p>
-                <h3 id="stat-total-draws" class="text-2xl font-bold mt-1 text-slate-100">100</h3>
-            </div>
-            <div class="bg-slate-800/60 border border-slate-700/60 p-4 rounded-xl">
-                <p class="text-xs text-slate-400 font-medium">Con số Hot nhất (Về nhiều)</p>
-                <h3 id="stat-hot-num" class="text-2xl font-bold mt-1 text-red-400">--</h3>
-            </div>
-            <div class="bg-slate-800/60 border border-slate-700/60 p-4 rounded-xl">
-                <p class="text-xs text-slate-400 font-medium">Con số Cold nhất (Gan lâu)</p>
-                <h3 id="stat-cold-num" class="text-2xl font-bold mt-1 text-blue-400">--</h3>
-            </div>
-            <div class="bg-slate-800/60 border border-slate-700/60 p-4 rounded-xl">
-                <p class="text-xs text-slate-400 font-medium">Tỷ lệ Chẵn / Lẻ trung bình</p>
-                <h3 id="stat-even-odd" class="text-2xl font-bold mt-1 text-amber-400">50% / 50%</h3>
-            </div>
-        </div>
-
         <!-- Main Workspace -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             
@@ -150,10 +130,10 @@
             <div class="lg:col-span-1 space-y-6">
                 <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl shadow-xl space-y-5">
                     <h2 class="text-lg font-bold flex items-center gap-2 text-slate-100">
-                        <i data-lucide="sliders" class="w-5 h-5 text-red-500"></i> Bảng điều khiển tạo số
+                        <i data-lucide="sliders" class="w-5 h-5 text-red-500"></i> Bảng điều khiển & Dự đoán
                     </h2>
 
-                    <!-- Game Selection -->
+                    <!-- 1. Game Selection -->
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Loại hình xổ số</label>
                         <select id="game-type" onchange="initApp()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none text-amber-400">
@@ -166,7 +146,7 @@
                         </select>
                     </div>
 
-                    <!-- Algorithm Selection -->
+                    <!-- 2. Algorithm Selection -->
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Thuật toán phân tích xu hướng</label>
                         <select id="algo-type" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none">
@@ -177,18 +157,31 @@
                         </select>
                     </div>
 
-                    <!-- Number of Sets -->
+                    <!-- 3. Số lượng bộ số dự đoán (Mặc định = 2) -->
                     <div>
                         <label class="block text-xs font-semibold uppercase text-slate-400 mb-2">Số lượng bộ số dự đoán</label>
-                        <input type="number" id="ticket-count" value="3" min="1" max="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none">
+                        <input type="number" id="ticket-count" value="2" min="1" max="10" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-red-500 outline-none">
                     </div>
 
-                    <!-- VIỆT HOÁ TOÀN BỘ JACKPOT METER -->
-                    <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-5 rounded-xl space-y-3.5 relative overflow-hidden">
+                    <!-- 4. Khung bộ số gợi ý tối ưu -->
+                    <div class="space-y-2 pt-1 border-t border-slate-700/60">
+                        <label class="block text-xs font-semibold uppercase text-slate-400 flex items-center gap-1.5">
+                            <i data-lucide="award" class="w-4 h-4 text-amber-400"></i> Bộ số gợi ý tối ưu
+                        </label>
+
+                        <div id="predictions-container" class="space-y-3">
+                            <div class="text-xs text-slate-400 italic text-center py-4 bg-slate-900/50 rounded-xl border border-slate-800">
+                                Nhấn "CHẠY AI DỰ ĐOÁN" để khởi tạo bộ số.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Jackpot Meter -->
+                    <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative overflow-hidden">
                         <div class="flex justify-between items-center">
                             <div class="flex items-center gap-2">
                                 <i data-lucide="flame" id="meter-flame-icon" class="w-5 h-5 text-amber-500"></i>
-                                <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Thước Đo Jackpot (Jackpot Meter)</span>
+                                <span class="text-xs font-bold uppercase tracking-wider text-slate-300">Thước Đo Jackpot</span>
                             </div>
                             <span id="alert-badge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700">
                                 BÌNH THƯỜNG
@@ -197,10 +190,10 @@
 
                         <div class="space-y-1.5">
                             <div class="flex justify-between text-xs font-semibold">
-                                <span class="text-slate-400">Xác suất nổ Jackpot (AI phân tích):</span>
+                                <span class="text-slate-400">Xác suất nổ Jackpot:</span>
                                 <span id="meter-score-text" class="text-amber-400 font-mono text-sm">72%</span>
                             </div>
-                            <div class="w-full bg-slate-800 h-3.5 rounded-full p-0.5 overflow-hidden border border-slate-700">
+                            <div class="w-full bg-slate-800 h-3 rounded-full p-0.5 overflow-hidden border border-slate-700">
                                 <div id="meter-bar" class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-blue-500 via-amber-400 to-red-500" style="width: 72%;"></div>
                             </div>
                         </div>
@@ -214,21 +207,10 @@
                         </p>
                     </div>
 
-                    <!-- Action Button -->
+                    <!-- 6. Nút "CHẠY AI DỰ ĐOÁN" -->
                     <button onclick="generatePredictions()" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 hover:from-red-500 hover:to-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2">
                         <i data-lucide="sparkles" class="w-5 h-5"></i> CHẠY AI DỰ ĐOÁN
                     </button>
-                </div>
-
-                <!-- Predictions Output Panel -->
-                <div class="bg-slate-800/80 border border-slate-700 p-6 rounded-2xl shadow-xl space-y-4">
-                    <h2 class="text-lg font-bold flex items-center gap-2 text-slate-100">
-                        <i data-lucide="award" class="w-5 h-5 text-amber-400"></i> Bộ số gợi ý tối ưu
-                    </h2>
-
-                    <div id="predictions-container" class="space-y-3">
-                        <div class="text-sm text-slate-400 italic text-center py-6">Nhấn "CHẠY AI DỰ ĐOÁN" để khởi tạo bộ số.</div>
-                    </div>
                 </div>
             </div>
 
@@ -359,7 +341,6 @@
             timerInterval = setInterval(updateTimer, 1000);
         }
 
-        // Kết nối thời gian thực đến Vietlott qua API / Proxy public
         async function fetchVietlottData() {
             const statusEl = document.getElementById('data-status');
             statusEl.className = "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-500/10 text-amber-400 border border-amber-500/20";
@@ -368,7 +349,6 @@
             const gameType = document.getElementById('game-type').value;
 
             try {
-                // Thử gọi proxy lấy dữ liệu thực từ vietlott.vn
                 const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://vietlott.vn')}`);
                 if (!response.ok) throw new Error("Cổng Vietlott bận");
             } catch (e) {
@@ -447,7 +427,6 @@
             return freqs;
         }
 
-        // Render bóng số với màu sắc chuẩn theo giao diện App Vietlott
         function renderBalls(numbers, gameType) {
             if (gameType === 'mega645') {
                 return numbers.map(n => `<span class="ball ball-mega">${n < 10 ? '0'+n : n}</span>`).join('');
@@ -471,7 +450,6 @@
                 return html;
             } 
             else if (gameType.startsWith('max3d')) {
-                // Định dạng hiển thị bóng Max 3D / 3D+ / 3D Pro đúng như App thật
                 return numbers.map((setStr, idx) => {
                     const digits = setStr.split('');
                     const ballsHtml = digits.map(d => `<span class="ball ball-max3d">${d}</span>`).join('');
@@ -489,11 +467,6 @@
             const freqs = getFrequencies(gameType);
 
             updateNextDrawInfo(gameType);
-            document.getElementById('stat-total-draws').innerText = rawDraws.length;
-            
-            const sortedByFreq = Object.entries(freqs).sort((a, b) => b[1] - a[1]);
-            document.getElementById('stat-hot-num').innerText = `Số ${sortedByFreq[0][0]} (${sortedByFreq[0][1]} lần)`;
-            document.getElementById('stat-cold-num').innerText = `Số ${sortedByFreq[sortedByFreq.length - 1][0]} (${sortedByFreq[sortedByFreq.length - 1][1]} lần)`;
 
             const tbody = document.getElementById('history-table-body');
             tbody.innerHTML = '';
@@ -579,7 +552,7 @@
         // GIỮ NGUYÊN THUẬT TOÁN AI PHÂN TÍCH BAN ĐẦU
         function generatePredictions() {
             const gameType = document.getElementById('game-type').value;
-            const count = parseInt(document.getElementById('ticket-count').value) || 3;
+            const count = parseInt(document.getElementById('ticket-count').value) || 2;
             const container = document.getElementById('predictions-container');
             container.innerHTML = '';
 
@@ -634,9 +607,9 @@
 
             predictedList.forEach((itemNums, index) => {
                 const card = document.createElement('div');
-                card.className = "bg-slate-900 border border-slate-700/80 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 shadow-md";
+                card.className = "bg-slate-900 border border-slate-700/80 p-3 rounded-xl flex flex-wrap items-center justify-between gap-2 shadow-md";
                 card.innerHTML = `
-                    <span class="text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded">Bộ số #${index + 1}</span>
+                    <span class="text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">Bộ số #${index + 1}</span>
                     <div class="flex items-center gap-1 flex-wrap">${renderBalls(itemNums, gameType)}</div>
                 `;
                 container.appendChild(card);
@@ -646,7 +619,6 @@
             triggerFireworks();
         }
 
-        // Cập nhật Jackpot Meter Việt hoá toàn bộ
         function updateJackpotMeter() {
             const aiScore = getRandomInt(65, 94);
             const jackpotAmount = getRandomInt(25, 180);
@@ -671,7 +643,7 @@
                 scoreText.className = "text-red-500 font-mono text-base font-extrabold";
                 bar.className = "h-full rounded-full transition-all duration-700 bg-gradient-to-r from-amber-500 via-red-500 to-red-600";
                 
-                card.className = "bg-slate-950 border border-red-500/50 p-5 rounded-xl space-y-3.5 relative overflow-hidden high-alert-glow";
+                card.className = "bg-slate-950 border border-red-500/50 p-4 rounded-xl space-y-3 relative overflow-hidden high-alert-glow";
                 desc.innerText = "⚠️ BÁO ĐỘNG ĐỎ: Điểm AI vượt 90%! Giá trị giải thưởng đã chạm ngưỡng tới hạn cực kỳ tiềm năng.";
             } else if (aiScore >= 78) {
                 badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/40";
@@ -681,7 +653,7 @@
                 scoreText.className = "text-amber-400 font-mono text-sm font-bold";
                 bar.className = "h-full rounded-full transition-all duration-700 bg-gradient-to-r from-blue-500 via-amber-400 to-red-500";
                 
-                card.className = "bg-slate-950 border border-slate-800 p-5 rounded-xl space-y-3.5 relative overflow-hidden";
+                card.className = "bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative overflow-hidden";
                 desc.innerText = "Tích lũy giải ở mức nhiệt độ cao. Chu kỳ phân bổ xác suất nổ Jackpot rất đáng chú ý.";
             } else {
                 badge.className = "px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700";
@@ -691,7 +663,7 @@
                 scoreText.className = "text-blue-400 font-mono text-sm font-bold";
                 bar.className = "h-full rounded-full transition-all duration-700 bg-gradient-to-r from-blue-600 to-amber-400";
                 
-                card.className = "bg-slate-950 border border-slate-800 p-5 rounded-xl space-y-3.5 relative overflow-hidden";
+                card.className = "bg-slate-950 border border-slate-800 p-4 rounded-xl space-y-3 relative overflow-hidden";
                 desc.innerText = "Chu kỳ tích lũy ở mức ổn định. Thích hợp để chọn bộ số nuôi dài hạn.";
             }
         }
