@@ -1,7 +1,6 @@
 {
   "name": "Vietlott Deep Learning AI Predictor Pro",
   "short_name": "Vietlott AI",
-  "description": "Ứng dụng dự đoán Vietlott bằng mô hình TensorFlow.js",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
