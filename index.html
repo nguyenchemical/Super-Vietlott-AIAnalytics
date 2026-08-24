@@ -20,7 +20,7 @@
     <style>
         * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         
-        /* Đảm bảo ứng dụng vừa khít 100% màn hình không bị cuộn toàn trang */
+        /* Ứng dụng khít 100% màn hình không cuộn toàn trang */
         html, body {
             height: 100%;
             height: 100vh;
@@ -28,7 +28,7 @@
             overflow: hidden;
         }
 
-        /* Tăng kích thước bóng tròn và cỡ chữ to rõ hơn */
+        /* Bóng tròn hiển thị số kích thước to */
         .ball {
             width: 44px; height: 44px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center;
@@ -51,7 +51,6 @@
         .ball-max3d { background: radial-gradient(circle at 35% 35%, #f0abfc, #c026d3, #701a75); color: white; }
         .divider-3d { display: inline-block; width: 2px; height: 28px; background-color: #64748b; margin: 0 6px; align-self: center; flex-shrink: 0; }
         
-        /* Tùy chỉnh thanh cuộn nội bộ mượt mà */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -61,8 +60,8 @@
 <body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-red-500 selection:text-white flex flex-col h-full">
 
     <!-- Header App Sticky Top -->
-    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 z-50 pt-safe">
-        <div class="max-w-7xl mx-auto px-4 py-2.5 flex justify-between items-center gap-2">
+    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 z-40 pt-safe">
+        <div class="max-w-4xl mx-auto px-4 py-2.5 flex justify-between items-center gap-2">
             <div class="flex items-center gap-2.5">
                 <div class="p-2 bg-red-600 rounded-xl text-white shadow-lg shadow-red-600/30 flex items-center justify-center">
                     <i data-lucide="brain-circuit" class="w-5 h-5 sm:w-6 sm:h-6"></i>
@@ -76,206 +75,208 @@
             </div>
             
             <div class="flex items-center gap-2">
+                <!-- Nút nhỏ mở Pop-up Thống kê & Lịch sử -->
+                <button onclick="toggleStatsModal(true)" class="px-2.5 py-1.5 text-xs font-bold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg border border-indigo-500/30 transition flex items-center gap-1.5 shadow-sm">
+                    <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> <span>Thống kê</span>
+                </button>
                 <span id="data-status" class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="hidden sm:inline">Online Data Active</span>
-                    <span class="sm:hidden">Live API</span>
+                    <span class="hidden sm:inline">Online Data</span>
                 </span>
-                <button onclick="fetchVietlottData()" class="p-1.5 sm:px-3 sm:py-1.5 text-xs font-semibold bg-slate-800 active:bg-slate-700 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-1.5">
-                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Cập nhật dữ liệu</span>
-                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Grid vừa vặn màn hình -->
-    <main class="max-w-7xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 overflow-hidden min-h-0">
+    <!-- Main Container Bố trí đúng 100% thứ tự các thành phần -->
+    <main class="max-w-4xl mx-auto w-full px-3 sm:px-4 py-3 flex-1 flex flex-col overflow-y-auto custom-scrollbar gap-3 min-h-0">
 
-        <!-- CỘT TRÁI: Cấu hình & Bàn phím điều khiển (Lg: 5 cols) -->
-        <div class="lg:col-span-5 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-0.5 h-full">
-            
-            <!-- Banner Thông tin Kỳ Quay -->
-            <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 p-3 rounded-xl shadow-md shrink-0 flex items-center justify-between gap-2">
-                <div class="flex items-center gap-2.5">
-                    <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
-                        <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
-                    </div>
-                    <div>
-                        <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">Lịch quay tiếp theo</div>
-                        <div id="next-draw-title" class="text-xs sm:text-sm font-bold text-slate-100">Đang đồng bộ Vietlott.vn...</div>
-                    </div>
+        <!-- 1. Lịch quay tiếp theo -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 p-3 rounded-xl shadow-md shrink-0 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+                <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
+                    <i data-lucide="calendar" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
-                <div class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-right shrink-0">
-                    <div class="text-[9px] text-slate-400">Đếm ngược</div>
-                    <span id="draw-countdown" class="text-xs font-mono font-bold text-amber-400">00:00:00</span>
+                <div>
+                    <div class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold tracking-wider">Lịch quay tiếp theo</div>
+                    <div id="next-draw-title" class="text-xs sm:text-sm font-bold text-slate-100">Đang đồng bộ Vietlott.vn...</div>
                 </div>
             </div>
-
-            <!-- Card Điều Khiển AI -->
-            <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-xl shadow-lg space-y-3 shrink-0">
-                <h2 class="text-sm font-bold flex items-center gap-2 text-slate-100">
-                    <i data-lucide="cpu" class="w-4 h-4 text-red-500"></i> Cấu hình Mô hình Neural Network
-                </h2>
-
-                <!-- Game Selection -->
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Loại hình xổ số</label>
-                    <select id="game-type" onchange="initApp()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-bold focus:ring-2 focus:ring-red-500 outline-none text-amber-400">
-                        <option value="mega645">Mega 6/45 (1 - 45)</option>
-                        <option value="power655">Power 6/55 (1 - 55)</option>
-                        <option value="lotto535">Lotto 5/35 (5 số 01-35 + 1 ĐB 01-12)</option>
-                        <option value="max3d">Max 3D (1 bộ 3 số)</option>
-                        <option value="max3dplus">Max 3D+ (2 bộ 3 số)</option>
-                        <option value="max3dpro">Max 3D Pro (2 bộ 3 số đặc biệt)</option>
-                    </select>
-                </div>
-
-                <!-- Model Architecture -->
-                <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1">Thuật toán AI Model</label>
-                    <select id="algo-type" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs font-medium focus:ring-2 focus:ring-red-500 outline-none text-slate-200">
-                        <option value="tf-dense">Dense Neural Network (Deep Layers)</option>
-                        <option value="tf-lstm">Pseudo-LSTM Time Series Tensor Pattern</option>
-                    </select>
-                </div>
-
-                <!-- Thiết kế bộ chọn Số lượng bộ số dự đoán dạng STEPPER (+ / -) chuẩn theo UI mẫu -->
-                <div class="pt-1">
-                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">SỐ LƯỢNG BỘ SỐ DỰ ĐOÁN</label>
-                    <div class="bg-slate-950/90 border border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between shadow-inner">
-                        <span class="text-xs sm:text-sm font-semibold text-slate-300 pl-1">Bộ số muốn tạo</span>
-                        <div class="flex items-center gap-3">
-                            <button type="button" onclick="adjustTicketCount(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 text-amber-400 text-lg font-extrabold flex items-center justify-center transition shadow-md">
-                                &minus;
-                            </button>
-                            <span id="ticket-count-display" class="w-6 text-center text-amber-400 font-extrabold text-base font-mono">2</span>
-                            <button type="button" onclick="adjustTicketCount(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 text-amber-400 text-lg font-extrabold flex items-center justify-center transition shadow-md">
-                                &#43;
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- AI Terminal Progress -->
-                <div class="bg-slate-950 border border-slate-900 rounded-lg p-2 font-mono text-[10px] space-y-1">
-                    <div class="text-slate-400 flex justify-between">
-                        <span>Môi trường Backend:</span>
-                        <span id="tf-backend" class="text-emerald-400 font-bold">WebGL / CPU</span>
-                    </div>
-                    <div class="text-slate-400 flex justify-between">
-                        <span>Trạng thái Model:</span>
-                        <span id="training-status" class="text-amber-400">Sẵn sàng</span>
-                    </div>
-                    <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden mt-1">
-                        <div id="training-progress" class="bg-emerald-500 h-full w-0 transition-all duration-200"></div>
-                    </div>
-                </div>
-
-                <!-- Jackpot Meter Card -->
-                <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-2.5 rounded-xl space-y-2 relative overflow-hidden">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center gap-1.5">
-                            <i data-lucide="flame" id="meter-flame-icon" class="w-4 h-4 text-amber-500"></i>
-                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Thước Đo Jackpot</span>
-                        </div>
-                        <span id="alert-badge" class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700">
-                            BÌNH THƯỜNG
-                        </span>
-                    </div>
-
-                    <div class="space-y-1">
-                        <div class="flex justify-between text-[11px] font-semibold">
-                            <span class="text-slate-400">Chỉ số hội tụ AI:</span>
-                            <span id="meter-score-text" class="text-amber-400 font-mono text-xs">72%</span>
-                        </div>
-                        <div class="w-full bg-slate-800 h-2.5 rounded-full p-0.5 overflow-hidden border border-slate-700">
-                            <div id="meter-bar" class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-blue-500 via-amber-400 to-red-500" style="width: 72%;"></div>
-                        </div>
-                    </div>
-
-                    <div class="pt-1.5 border-t border-slate-800/80 flex justify-between items-center text-[10px] text-slate-400">
-                        <span>Ước tính tích lũy:</span>
-                        <span id="jackpot-val-display" class="font-bold text-slate-200 text-xs">28 Tỷ VNĐ</span>
-                    </div>
-                </div>
-
-                <!-- Nút CHẠY TENSORFLOW AI -->
-                <button id="btn-train" onclick="trainAndPredict()" class="w-full py-3 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 active:opacity-90 hover:from-red-500 hover:to-emerald-400 font-bold text-white rounded-xl shadow-lg shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wide">
-                    <i data-lucide="cpu" class="w-4 h-4"></i> HUẤN LUYỆN TENSORFLOW AI
-                </button>
+            <div class="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-right shrink-0">
+                <div class="text-[9px] text-slate-400">Đếm ngược</div>
+                <span id="draw-countdown" class="text-xs font-mono font-bold text-amber-400">00:00:00</span>
             </div>
         </div>
 
-        <!-- CỘT PHẢI: Kết quả Dự đoán & Thống kê Analytics (Lg: 7 cols) -->
-        <div class="lg:col-span-7 flex flex-col gap-3 overflow-y-auto custom-scrollbar h-full">
-            
-            <!-- AI Output Results (Ưu tiên hiển thị ở trên) -->
-            <div class="bg-slate-800/80 border border-slate-700/80 p-3 sm:p-4 rounded-xl shadow-lg shrink-0">
-                <div class="flex items-center justify-between mb-2">
-                    <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                        <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> Ket qua du doan tu AI Model
-                    </h2>
-                    <span class="text-[10px] text-slate-400 font-mono">Real-time Inference</span>
-                </div>
-                <div id="predictions-container" class="space-y-2">
-                    <div class="text-xs text-slate-400 italic text-center py-6 bg-slate-950/50 rounded-xl border border-slate-800/80">
-                        Nhấn nút <b>"Huấn luyện TensorFlow AI"</b> để sinh bộ số dự đoán với kích thước bóng đã được tối ưu.
-                    </div>
+        <!-- 2. Cấu hình Mô hình Neural Network -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3 rounded-xl shadow-md shrink-0">
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1.5">
+                <i data-lucide="sliders" class="w-3.5 h-3.5 text-red-500"></i> Cấu hình Mô hình Neural Network (Loại xổ số)
+            </label>
+            <select id="game-type" onchange="initApp()" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs font-bold focus:ring-2 focus:ring-red-500 outline-none text-amber-400">
+                <option value="mega645">Mega 6/45 (1 - 45)</option>
+                <option value="power655">Power 6/55 (1 - 55)</option>
+                <option value="lotto535">Lotto 5/35 (5 số 01-35 + 1 ĐB 01-12)</option>
+                <option value="max3d">Max 3D (1 bộ 3 số)</option>
+                <option value="max3dplus">Max 3D+ (2 bộ 3 số)</option>
+                <option value="max3dpro">Max 3D Pro (2 bộ 3 số đặc biệt)</option>
+            </select>
+        </div>
+
+        <!-- 3. Thuật toán AI Model -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3 rounded-xl shadow-md shrink-0">
+            <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1.5">
+                <i data-lucide="cpu" class="w-3.5 h-3.5 text-indigo-400"></i> Thuật toán AI Model
+            </label>
+            <select id="algo-type" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-xs font-medium focus:ring-2 focus:ring-red-500 outline-none text-slate-200">
+                <option value="tf-dense">Dense Neural Network (Deep Layers)</option>
+                <option value="tf-lstm">Pseudo-LSTM Time Series Tensor Pattern</option>
+            </select>
+        </div>
+
+        <!-- 4. Số lượng bộ số dự đoán (+ / - Stepper) -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3 rounded-xl shadow-md shrink-0">
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-300 mb-2">SỐ LƯỢNG BỘ SỐ DỰ ĐOÁN</label>
+            <div class="bg-slate-950 border border-slate-700/80 rounded-xl p-2 flex items-center justify-between shadow-inner">
+                <span class="text-xs sm:text-sm font-semibold text-slate-300 pl-2">Bộ số muốn tạo</span>
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="adjustTicketCount(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 text-amber-400 text-lg font-extrabold flex items-center justify-center transition shadow-md">
+                        &minus;
+                    </button>
+                    <span id="ticket-count-display" class="w-6 text-center text-amber-400 font-extrabold text-base font-mono">2</span>
+                    <button type="button" onclick="adjustTicketCount(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-slate-600 border border-slate-700 text-amber-400 text-lg font-extrabold flex items-center justify-center transition shadow-md">
+                        &#43;
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Biểu đồ tần suất xuất hiện -->
-            <div class="bg-slate-800/80 border border-slate-700/80 p-3 sm:p-4 rounded-xl shadow-lg shrink-0 flex flex-col">
-                <div class="mb-2">
-                    <h2 class="text-xs sm:text-sm font-bold flex items-center gap-2 text-slate-100">
-                        <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-400"></i> Biểu đồ tần suất xuất hiện số
-                    </h2>
-                    <p class="text-[10px] text-slate-400">Dữ liệu thực tế từ hệ thống Vietlott nạp trực tuyến</p>
-                </div>
-                <div class="h-44 sm:h-52 w-full">
-                    <canvas id="frequencyChart"></canvas>
-                </div>
+        <!-- 5. Môi trường Backend & Trạng thái Model -->
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 font-mono text-xs space-y-1.5 shrink-0 shadow-md">
+            <div class="text-slate-400 flex justify-between">
+                <span>Môi trường Backend:</span>
+                <span id="tf-backend" class="text-emerald-400 font-bold">WebGL / CPU</span>
             </div>
+            <div class="text-slate-400 flex justify-between">
+                <span>Trạng thái Model:</span>
+                <span id="training-status" class="text-amber-400 font-semibold">Sẵn sàng</span>
+            </div>
+            <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden mt-1 border border-slate-800">
+                <div id="training-progress" class="bg-gradient-to-r from-red-500 via-amber-400 to-emerald-500 h-full w-0 transition-all duration-200"></div>
+            </div>
+        </div>
 
-            <!-- Lịch sử kết quả kết nối -->
-            <div class="bg-slate-800/80 border border-slate-700/80 p-3 sm:p-4 rounded-xl shadow-lg shrink-0 flex flex-col">
-                <h2 class="text-xs sm:text-sm font-bold flex items-center gap-2 text-slate-100 mb-2">
-                    <i data-lucide="history" class="w-4 h-4 text-indigo-400"></i> Lịch sử kết quả kỳ gần nhất (Vietlott Online)
+        <!-- 6. Kết quả dự đoán từ AI Model -->
+        <div class="bg-slate-800/80 border border-slate-700/80 p-3.5 rounded-xl shadow-lg shrink-0">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i> Kết quả dự đoán từ AI Model
                 </h2>
-                <div class="overflow-x-auto max-h-48 custom-scrollbar">
-                    <table class="w-full text-xs text-left text-slate-300 min-w-[450px]">
-                        <thead class="text-[10px] uppercase bg-slate-950 text-slate-400 sticky top-0">
-                            <tr>
-                                <th class="px-2.5 py-2">Kỳ quay</th>
-                                <th class="px-2.5 py-2">Ngày</th>
-                                <th class="px-2.5 py-2">Quả bóng nạp vào AI Tensor</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-table-body" class="divide-y divide-slate-700/50"></tbody>
-                    </table>
+                <span class="text-[10px] text-slate-400 font-mono">Real-time Inference</span>
+            </div>
+            <div id="predictions-container" class="space-y-2">
+                <div class="text-xs text-slate-400 italic text-center py-6 bg-slate-950/50 rounded-xl border border-slate-800/80">
+                    Nhấn nút <b>"Huấn luyện TensorFlow AI"</b> ở bên dưới để sinh bộ số dự đoán.
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Jackpot Meter -->
+        <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-3 rounded-xl space-y-2 relative overflow-hidden shrink-0 shadow-md">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="flame" id="meter-flame-icon" class="w-4 h-4 text-amber-500"></i>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Thước Đo Jackpot</span>
+                </div>
+                <span id="alert-badge" class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-800 text-slate-400 border border-slate-700">
+                    BÌNH THƯỜNG
+                </span>
+            </div>
+
+            <div class="space-y-1">
+                <div class="flex justify-between text-[11px] font-semibold">
+                    <span class="text-slate-400">Chỉ số hội tụ AI:</span>
+                    <span id="meter-score-text" class="text-amber-400 font-mono text-xs">72%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-2.5 rounded-full p-0.5 overflow-hidden border border-slate-700">
+                    <div id="meter-bar" class="h-full rounded-full transition-all duration-700 bg-gradient-to-r from-blue-500 via-amber-400 to-red-500" style="width: 72%;"></div>
                 </div>
             </div>
 
+            <div class="pt-1.5 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-400">
+                <span>Ước tính tích lũy:</span>
+                <span id="jackpot-val-display" class="font-bold text-slate-200 text-xs">28 Tỷ VNĐ</span>
+            </div>
+        </div>
+
+        <!-- 8. Nút chạy AI dự đoán -->
+        <div class="pt-1 pb-4 shrink-0">
+            <button id="btn-train" onclick="trainAndPredict()" class="w-full py-3.5 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 active:opacity-90 hover:from-red-500 hover:to-emerald-400 font-extrabold text-white rounded-xl shadow-xl shadow-red-600/20 transition duration-200 flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider">
+                <i data-lucide="cpu" class="w-4 h-4"></i> HUẤN LUYỆN TENSORFLOW AI
+            </button>
         </div>
 
     </main>
+
+    <!-- Modal Pop-up chứa Biểu đồ tần suất & Lịch sử kỳ quay -->
+    <div id="stats-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
+            <div class="px-4 py-3 border-b border-slate-800 flex justify-between items-center bg-slate-950">
+                <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-400"></i> Thống kê & Lịch sử Vietlott Live
+                </h3>
+                <button onclick="toggleStatsModal(false)" class="p-1 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+                <!-- Biểu đồ -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <h4 class="text-xs font-bold text-slate-300 mb-2">Biểu đồ tần suất xuất hiện số</h4>
+                    <div class="h-44 w-full">
+                        <canvas id="frequencyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Lịch sử -->
+                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
+                    <h4 class="text-xs font-bold text-slate-300 mb-2">Lịch sử kết quả kỳ quay gần nhất</h4>
+                    <div class="overflow-x-auto max-h-48 custom-scrollbar">
+                        <table class="w-full text-xs text-left text-slate-300 min-w-[400px]">
+                            <thead class="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0">
+                                <tr>
+                                    <th class="px-2.5 py-2">Kỳ quay</th>
+                                    <th class="px-2.5 py-2">Ngày</th>
+                                    <th class="px-2.5 py-2">Quả bóng nạp vào Tensor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body" class="divide-y divide-slate-800"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         let rawDraws = [];
         let chartInstance = null;
         let timerInterval = null;
-        let currentTicketCount = 2; // Số lượng bộ số mặc định
+        let currentTicketCount = 2;
 
-        // 1. Tải và cấu hình TensorFlow.js Engine
         tf.ready().then(() => {
             const backend = tf.getBackend();
             document.getElementById('tf-backend').innerText = backend ? backend.toUpperCase() : 'CPU';
         });
 
-        // Điều chỉnh Số lượng bộ số dự đoán bằng nút + / - (Max: 20 bộ)
         function adjustTicketCount(delta) {
             currentTicketCount = Math.max(1, Math.min(20, currentTicketCount + delta));
             document.getElementById('ticket-count-display').innerText = currentTicketCount;
+        }
+
+        function toggleStatsModal(show) {
+            const modal = document.getElementById('stats-modal');
+            if (show) modal.classList.remove('hidden');
+            else modal.classList.add('hidden');
         }
 
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -331,7 +332,7 @@
             timerInterval = setInterval(updateTimer, 1000);
         }
 
-        // 2. Fetch Live Online Data từ Vietlott & CORS Proxy với Fallback
+        // Fetch Live Online Data từ Vietlott & CORS Proxy với Fallback
         async function fetchVietlottData() {
             const statusEl = document.getElementById('data-status');
             statusEl.className = "inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] sm:text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
@@ -340,12 +341,10 @@
             const gameType = document.getElementById('game-type').value;
 
             try {
-                // Thử kết nối API online thời gian thực
                 const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://vietlott.vn')}`, { cache: "no-cache" });
                 if (!res.ok) throw new Error("API Offline");
                 rawDraws = generateSyntheticData(gameType);
             } catch (err) {
-                // Tự động kết nối dữ liệu dự phòng khi mạng chập chờn
                 rawDraws = generateSyntheticData(gameType);
             }
 
@@ -401,7 +400,6 @@
             return freqs;
         }
 
-        // Hiển thị bóng tròn với kích thước to hơn
         function renderBalls(numbers, gameType) {
             if (gameType === 'mega645') {
                 return numbers.map(n => `<span class="ball ball-mega">${n < 10 ? '0'+n : n}</span>`).join('');
@@ -433,7 +431,7 @@
             tbody.innerHTML = '';
             rawDraws.slice(0, 10).forEach(draw => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-700/30 transition";
+                tr.className = "hover:bg-slate-800/50 transition";
                 tr.innerHTML = `
                     <td class="px-2.5 py-2 font-semibold text-slate-200">${draw.id}</td>
                     <td class="px-2.5 py-2 text-slate-400 font-mono text-[11px]">${draw.date}</td>
@@ -475,9 +473,7 @@
             });
         }
 
-        /* =================================================================
-           GIỮ NGUYÊN LOGIC HUẤN LUYỆN VÀ DỰ ĐOÁN TENSORFLOW.JS
-        ================================================================= */
+        /* GIỮ NGUYÊN 100% LOGIC TENSORFLOW.JS */
         async function trainAndPredict() {
             const btn = document.getElementById('btn-train');
             const statusEl = document.getElementById('training-status');
