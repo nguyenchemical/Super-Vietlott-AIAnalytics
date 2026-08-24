@@ -98,10 +98,10 @@
         </div>
     </header>
 
-    <!-- Main Grid Dashboard: Flex-1 Tương thích iOS không làm đơ WebKit -->
+    <!-- Main Grid Dashboard -->
     <main class="max-w-6xl mx-auto w-full px-2 sm:px-4 py-2 flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 pb-safe">
 
-        <!-- CỘT TRÁI: Cấu hình & Bàn điều khiển (Md: 5 cols) -->
+        <!-- CỘT TRÁI: Cấu hình & Bàn điều khiển -->
         <div class="md:col-span-5 flex flex-col gap-2">
             
             <!-- 1. Lịch quay tiếp theo -->
@@ -135,7 +135,7 @@
                 </select>
             </div>
 
-            <!-- 3. Thuật toán AI Model (Sửa tương thích WebGL/CPU cho iOS) -->
+            <!-- 3. Thuật toán AI Model -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i> Thuật toán AI Model
@@ -171,7 +171,7 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: Kết quả & Nút bấm (Md: 7 cols) -->
+        <!-- CỘT PHẢI: Kết quả & Nút bấm -->
         <div class="md:col-span-7 flex flex-col gap-2 min-h-0">
             
             <!-- 6. Kết quả dự đoán từ AI Model -->
@@ -261,10 +261,8 @@
         let timerInterval = null;
         let currentTicketCount = 2;
 
-        // Khởi tạo TensorFlow và ưu tiên WebGL / CPU fallback cho iOS WebKit
         tf.ready().then(async () => {
             try {
-                // Thử cài đặt CPU nếu WebGL trên iOS bị đơ hoặc chạm ngưỡng VRAM
                 const backend = tf.getBackend();
                 document.getElementById('tf-backend').innerText = backend ? backend.toUpperCase() : 'CPU';
             } catch (e) {
@@ -477,7 +475,6 @@
             });
         }
 
-        /* LOGIC HUẤN LUYỆN TENSORFLOW TỐI ƯU HÓA HOÀN TOÀN CHO IOS WEBKIT */
         async function trainAndPredict() {
             const btn = document.getElementById('btn-train');
             const statusEl = document.getElementById('training-status');
@@ -495,7 +492,6 @@
             statusEl.innerText = "Chuẩn hóa...";
             progressEl.style.width = '10%';
             
-            // Ép WebKit trên iOS vẽ lại DOM trước khi tính toán heavy
             await new Promise(r => setTimeout(r, 50));
             await tf.nextFrame();
 
@@ -530,7 +526,6 @@
             const featureSize = inputs[0].length;
             const model = tf.sequential();
 
-            // Cấu trúc mô hình được tối ưu hóa cho Safari
             if (algoType === 'tf-lstm') {
                 model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: [featureSize] }));
                 model.add(tf.layers.repeatVector({ n: 2 }));
@@ -556,7 +551,7 @@
             const xs = tf.tensor2d(inputs);
             const ys = tf.tensor2d(labels);
 
-            const epochs = 15; // Giảm xuống 15 để chạy cực mượt trên iOS Safari
+            const epochs = 15;
 
             await model.fit(xs, ys, {
                 epochs: epochs,
@@ -566,7 +561,6 @@
                         const pct = Math.floor(30 + ((epoch + 1) / epochs) * 60);
                         progressEl.style.width = `${pct}%`;
                         statusEl.innerText = `Epoch ${epoch + 1}/${epochs}`;
-                        // Delay nhẹ + nextFrame giúp iOS UI thread hoàn toàn rảnh rỗi để render
                         await new Promise(r => setTimeout(r, 15));
                         await tf.nextFrame();
                     }
@@ -584,7 +578,6 @@
                 return outputTensor.dataSync();
             });
 
-            // Dọn dẹp bộ nhớ triệt để cho iOS GPU Safari
             xs.dispose();
             ys.dispose();
             model.dispose();
@@ -600,51 +593,106 @@
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        /* THUẬT TOÁN ĐẢM BẢO 100% CÁC BỘ SỐ SINH RA KHÔNG TRÙNG NHAU */
+        /* THUẬT TOÁN ĐA DẠNG HÓA BỘ SỐ & NGUYÊN TẮC KHÔNG TRÙNG NHAU (WEIGHTED SAMPLING + TEMPERATURE) */
         function renderAIPredictions(aiProbabilities, gameType, count, maxNum) {
             const container = document.getElementById('predictions-container');
             container.innerHTML = '';
 
-            const indexedProbs = Array.from(aiProbabilities).map((prob, idx) => ({ number: idx + 1, prob: prob }));
-            const createdSets = new Set();
+            const temperature = 1.35;
+            const rawProbs = Array.from(aiProbabilities);
+            
+            const expScores = rawProbs.map(p => Math.exp(p / temperature));
+            const sumExp = expScores.reduce((a, b) => a + b, 0);
+            const normalizedProbs = expScores.map((exp, idx) => ({
+                number: idx + 1,
+                prob: exp / sumExp
+            }));
+
+            const generatedSets = [];
+
+            function isTooSimilar(newArr, existingArr) {
+                const setA = new Set(newArr);
+                const intersect = existingArr.filter(x => setA.has(x)).length;
+                const maxAllowedOverlap = Math.floor(newArr.length * 0.6);
+                return intersect > maxAllowedOverlap;
+            }
+
+            function weightedSample(candidates, numToSelect) {
+                const pool = [...candidates];
+                const selected = [];
+                
+                for (let i = 0; i < numToSelect; i++) {
+                    if (pool.length === 0) break;
+                    const totalWeight = pool.reduce((sum, item) => sum + item.prob, 0);
+                    let random = Math.random() * totalWeight;
+                    
+                    for (let j = 0; j < pool.length; j++) {
+                        random -= pool[j].prob;
+                        if (random <= 0) {
+                            selected.push(pool[j].number);
+                            pool.splice(j, 1);
+                            break;
+                        }
+                    }
+                }
+                return selected;
+            }
 
             for (let c = 0; c < count; c++) {
                 let selectedNumbers = [];
-                let key = "";
                 let attempts = 0;
+                let isUnique = false;
 
-                do {
+                while (!isUnique && attempts < 100) {
                     attempts++;
-                    const sorted = [...indexedProbs].sort((a, b) => {
-                        const weightA = a.prob + (Math.random() * 0.2) + (c * 0.05);
-                        const weightB = b.prob + (Math.random() * 0.2) + (c * 0.05);
-                        return weightB - weightA;
-                    });
-
+                    
                     if (gameType === 'mega645' || gameType === 'power655') {
-                        selectedNumbers = sorted.slice(0, 6).map(x => x.number).sort((a,b) => a - b);
+                        const mainCandidates = normalizedProbs.filter(x => x.number <= maxNum);
+                        const mainNums = weightedSample(mainCandidates, 6).sort((a, b) => a - b);
+                        
                         if (gameType === 'power655') {
-                            let specCandidate = sorted.slice(6).find(x => !selectedNumbers.includes(x.number));
-                            let spec = specCandidate ? specCandidate.number : getRandomInt(1, 55);
-                            selectedNumbers.push(spec);
+                            const remainCandidates = normalizedProbs.filter(x => x.number <= maxNum && !mainNums.includes(x.number));
+                            const spec = weightedSample(remainCandidates, 1)[0] || getRandomInt(1, 55);
+                            selectedNumbers = [...mainNums, spec];
+                        } else {
+                            selectedNumbers = mainNums;
                         }
+
                     } else if (gameType === 'lotto535') {
-                        const main = sorted.filter(x => x.number <= 35).slice(0, 5).map(x => x.number).sort((a,b) => a - b);
+                        const mainCandidates = normalizedProbs.filter(x => x.number <= 35);
+                        const mainNums = weightedSample(mainCandidates, 5).sort((a, b) => a - b);
                         const spec = getRandomInt(1, 12);
-                        selectedNumbers = [...main, spec];
+                        selectedNumbers = [...mainNums, spec];
+
                     } else if (gameType === 'max3d') {
-                        const digits = sorted.slice(0, 3).map(x => (x.number - 1) % 10).join('');
-                        selectedNumbers = [digits];
+                        const d1 = weightedSample(normalizedProbs, 1)[0] % 10;
+                        const d2 = weightedSample(normalizedProbs, 1)[0] % 10;
+                        const d3 = weightedSample(normalizedProbs, 1)[0] % 10;
+                        selectedNumbers = [`${d1}${d2}${d3}`];
+
                     } else {
-                        const d1 = sorted.slice(0, 3).map(x => (x.number - 1) % 10).join('');
-                        const d2 = sorted.slice(3, 6).map(x => (x.number - 1) % 10).join('');
-                        selectedNumbers = [d1, d2];
+                        const gen3D = () => {
+                            const d1 = weightedSample(normalizedProbs, 1)[0] % 10;
+                            const d2 = weightedSample(normalizedProbs, 1)[0] % 10;
+                            const d3 = weightedSample(normalizedProbs, 1)[0] % 10;
+                            return `${d1}${d2}${d3}`;
+                        };
+                        let setA = gen3D();
+                        let setB = gen3D();
+                        while (setA === setB) setB = gen3D();
+                        selectedNumbers = [setA, setB];
                     }
 
-                    key = selectedNumbers.join('-');
-                } while (createdSets.has(key) && attempts < 50);
+                    const stringKey = selectedNumbers.join('-');
+                    const hasDuplicateKey = generatedSets.some(s => s.join('-') === stringKey);
+                    const hasHighOverlap = generatedSets.some(s => isTooSimilar(selectedNumbers, s));
 
-                createdSets.add(key);
+                    if (!hasDuplicateKey && (!hasHighOverlap || attempts > 80)) {
+                        isUnique = true;
+                    }
+                }
+
+                generatedSets.push(selectedNumbers);
 
                 const card = document.createElement('div');
                 card.className = "bg-slate-950 border border-slate-700/80 p-2 rounded-xl flex items-center justify-between gap-2 shadow-md shrink-0";
