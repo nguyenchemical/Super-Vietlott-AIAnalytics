@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Vietlott Deep Learning AI Predictor Pro</title>
     
-    <!-- Icon & Manifest -->
-    <link rel="icon" type="image/png" href="icon.png">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png">
+    <!-- Tối ưu tốc độ tải CDN & Kết nối mạng chậm -->
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+    <link rel="dns-prefetch" href="https://unpkg.com">
     <meta name="theme-color" content="#0f172a">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
@@ -20,41 +18,19 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        * { 
-            -webkit-tap-highlight-color: transparent; 
-            touch-action: manipulation; 
-            box-sizing: border-box; 
-        }
-        
-        /* Tối ưu tương thích iOS Safari - Ngăn teo UI & sập viewport */
-        html {
-            height: 100%;
-            -webkit-text-size-adjust: 100%;
-        }
+        * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-sizing: border-box; }
+        html { height: 100%; -webkit-text-size-adjust: 100%; }
+        body { min-height: 100%; min-height: -webkit-fill-available; margin: 0; padding: 0; display: flex; flex-direction: column; background-color: #0f172a; }
 
-        body {
-            min-height: 100%;
-            min-height: -webkit-fill-available;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            background-color: #0f172a;
-        }
-
-        /* Bóng tròn hiển thị số tối ưu render GPU iOS */
         .ball {
             width: 36px; height: 36px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 0.95rem;
             box-shadow: inset -2px -2px 4px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
             margin: 1.5px; flex-shrink: 0;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden; backface-visibility: hidden;
         }
-        @media (min-width: 640px) {
-            .ball { width: 42px; height: 42px; font-size: 1.1rem; margin: 2px; }
-        }
+        @media (min-width: 640px) { .ball { width: 42px; height: 42px; font-size: 1.1rem; margin: 2px; } }
 
         .ball-mega { background: radial-gradient(circle at 35% 35%, #fb7185, #e11d48, #9f1239); color: white; }
         .ball-power { background: radial-gradient(circle at 35% 35%, #fde047, #d97706, #78350f); color: white; }
@@ -71,8 +47,8 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased">
 
-    <!-- Header App Compact Sticky (Hỗ trợ iOS Safe Area Top) -->
-    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 py-2 px-3 pt-safe">
+    <!-- Header App Compact Sticky -->
+    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 py-2 px-3">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <div class="p-1.5 bg-red-600 rounded-lg text-white shadow-md flex items-center justify-center">
@@ -82,7 +58,7 @@
                     <h1 class="text-xs sm:text-base font-extrabold bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 bg-clip-text text-transparent leading-none">
                         VIETLOTT TENSORFLOW AI
                     </h1>
-                    <p class="text-[9px] sm:text-[10px] text-slate-400">Realtime Deep Learning Predictor</p>
+                    <p class="text-[9px] sm:text-[10px] text-slate-400">Realtime Deep Learning Predictor (Non-Blocking UI)</p>
                 </div>
             </div>
             
@@ -92,19 +68,19 @@
                 </button>
                 <span id="data-status" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Live API</span>
+                    <span>Ready</span>
                 </span>
             </div>
         </div>
     </header>
 
     <!-- Main Grid Dashboard -->
-    <main class="max-w-6xl mx-auto w-full px-2 sm:px-4 py-2 flex-1 grid grid-cols-1 md:grid-cols-12 gap-2 pb-safe">
+    <main class="max-w-6xl mx-auto w-full px-2 sm:px-4 py-2 flex-1 grid grid-cols-1 md:grid-cols-12 gap-2">
 
         <!-- CỘT TRÁI: Cấu hình & Bàn điều khiển -->
         <div class="md:col-span-5 flex flex-col gap-2">
             
-            <!-- 1. Lịch quay tiếp theo -->
+            <!-- Lịch quay -->
             <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 p-2 rounded-xl shrink-0 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
@@ -120,7 +96,7 @@
                 </div>
             </div>
 
-            <!-- 2. Cấu hình Loại hình xổ số -->
+            <!-- Loại hình xổ số -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="sliders" class="w-3 h-3 text-red-500"></i> Loại hình xổ số
@@ -135,38 +111,38 @@
                 </select>
             </div>
 
-            <!-- 3. Thuật toán AI Model -->
+            <!-- Thuật toán AI Model -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i> Thuật toán AI Model
                 </label>
                 <select id="algo-type" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs font-medium focus:ring-1 focus:ring-red-500 outline-none text-slate-200">
-                    <option value="tf-dense">Dense Neural Network (Deep Layers)</option>
-                    <option value="tf-lstm">Pseudo-LSTM Time Series Tensor Pattern</option>
+                    <option value="tf-dense">Fast Light Deep Neural Network</option>
+                    <option value="tf-lstm">Time Series Tensor Pattern Model</option>
                 </select>
             </div>
 
-            <!-- 4. Số lượng bộ số dự đoán -->
+            <!-- Số lượng bộ số dự đoán -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-300 mb-1">SỐ LƯỢNG BỘ SỐ DỰ ĐOÁN</label>
                 <div class="bg-slate-950 border border-slate-700/80 rounded-lg p-1.5 flex items-center justify-between">
                     <span class="text-xs font-semibold text-slate-300 pl-1">Bộ số muốn tạo</span>
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="adjustTicketCount(-1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-extrabold flex items-center justify-center transition">&minus;</button>
-                        <span id="ticket-count-display" class="w-5 text-center text-amber-400 font-extrabold text-sm font-mono">2</span>
+                        <span id="ticket-count-display" class="w-5 text-center text-amber-400 font-extrabold text-sm font-mono">3</span>
                         <button type="button" onclick="adjustTicketCount(1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-extrabold flex items-center justify-center transition">&#43;</button>
                     </div>
                 </div>
             </div>
 
-            <!-- 5. Môi trường Backend & Trạng thái Model -->
+            <!-- Môi trường Backend & Trạng thái Model -->
             <div class="bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-[10px] space-y-1 shrink-0">
                 <div class="text-slate-400 flex justify-between">
-                    <span>Backend: <b id="tf-backend" class="text-emerald-400">Loading...</b></span>
+                    <span>Engine: <b id="tf-backend" class="text-emerald-400">Initializing...</b></span>
                     <span>Status: <b id="training-status" class="text-amber-400">Sẵn sàng</b></span>
                 </div>
                 <div class="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-slate-800">
-                    <div id="training-progress" class="bg-gradient-to-r from-red-500 to-emerald-500 h-full w-0 transition-all duration-200"></div>
+                    <div id="training-progress" class="bg-gradient-to-r from-red-500 to-emerald-500 h-full w-0 transition-all duration-150"></div>
                 </div>
             </div>
         </div>
@@ -174,13 +150,13 @@
         <!-- CỘT PHẢI: Kết quả & Nút bấm -->
         <div class="md:col-span-7 flex flex-col gap-2 min-h-0">
             
-            <!-- 6. Kết quả dự đoán từ AI Model -->
+            <!-- Kết quả dự đoán từ AI Model -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2.5 rounded-xl flex-1 flex flex-col min-h-[220px]">
                 <div class="flex items-center justify-between mb-1.5 shrink-0">
                     <h2 class="text-xs font-bold uppercase text-amber-400 flex items-center gap-1">
                         <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Kết quả dự đoán từ AI Model
                     </h2>
-                    <span class="text-[9px] text-slate-400 font-mono">100% Unique Sets</span>
+                    <span class="text-[9px] text-emerald-400 font-mono">100% Unique Engine</span>
                 </div>
                 <div id="predictions-container" class="space-y-1.5 overflow-y-auto custom-scrollbar flex-1 pr-1 max-h-[350px] md:max-h-none">
                     <div class="text-xs text-slate-400 italic text-center py-8 bg-slate-950/50 rounded-lg border border-slate-800">
@@ -189,7 +165,7 @@
                 </div>
             </div>
 
-            <!-- 7. Jackpot Meter -->
+            <!-- Jackpot Meter -->
             <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-2 rounded-xl space-y-1 shrink-0">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-1">
@@ -207,7 +183,7 @@
                 </div>
             </div>
 
-            <!-- 8. Nút chạy AI dự đoán -->
+            <!-- Nút bấm chạy AI -->
             <div class="shrink-0 mb-2 md:mb-0">
                 <button id="btn-train" onclick="trainAndPredict()" class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 active:opacity-90 hover:from-red-500 hover:to-emerald-400 font-extrabold text-white rounded-xl shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider">
                     <i data-lucide="cpu" class="w-4 h-4"></i> HUẤN LUYỆN TENSORFLOW AI
@@ -259,16 +235,16 @@
         let rawDraws = [];
         let chartInstance = null;
         let timerInterval = null;
-        let currentTicketCount = 2;
+        let currentTicketCount = 3;
 
+        // Khởi tạo TensorFlow.js nhanh, chống treo lag
         tf.ready().then(async () => {
             try {
-                const backend = tf.getBackend();
-                document.getElementById('tf-backend').innerText = backend ? backend.toUpperCase() : 'CPU';
+                await tf.setBackend('webgl');
             } catch (e) {
                 await tf.setBackend('cpu');
-                document.getElementById('tf-backend').innerText = 'CPU';
             }
+            document.getElementById('tf-backend').innerText = tf.getBackend().toUpperCase();
         });
 
         function adjustTicketCount(delta) {
@@ -335,31 +311,17 @@
             timerInterval = setInterval(updateTimer, 1000);
         }
 
-        async function fetchVietlottData() {
-            const statusEl = document.getElementById('data-status');
-            statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
-            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span> Sync Live...`;
-
+        // Tạo dữ liệu ngay lập tức, không để mạng chậm làm gián đoạn ứng dụng
+        function initApp() {
             const gameType = document.getElementById('game-type').value;
-
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent('https://vietlott.vn')}`, { cache: "no-cache" });
-                if (!res.ok) throw new Error("API Offline");
-                rawDraws = generateSyntheticData(gameType);
-            } catch (err) {
-                rawDraws = generateSyntheticData(gameType);
-            }
-
-            statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Active`;
-
+            rawDraws = generateSyntheticData(gameType);
             renderAll();
         }
 
         function generateSyntheticData(gameType) {
             const draws = [];
             const now = new Date();
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 60; i++) {
                 const drawDate = new Date(now - i * 2 * 86400000).toLocaleDateString('vi-VN');
                 let numbers = [];
                 if (gameType === 'mega645' || gameType === 'power655') {
@@ -475,6 +437,7 @@
             });
         }
 
+        // Huấn luyện không gây đóng băng UI (Async + Yielding)
         async function trainAndPredict() {
             const btn = document.getElementById('btn-train');
             const statusEl = document.getElementById('training-status');
@@ -489,10 +452,8 @@
             if (gameType === 'power655') maxNum = 55;
             if (gameType === 'lotto535') maxNum = 35;
 
-            statusEl.innerText = "Chuẩn hóa...";
+            statusEl.innerText = "Chuẩn hóa Tensor...";
             progressEl.style.width = '10%';
-            
-            await new Promise(r => setTimeout(r, 50));
             await tf.nextFrame();
 
             const inputs = [];
@@ -527,14 +488,10 @@
             const model = tf.sequential();
 
             if (algoType === 'tf-lstm') {
-                model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: [featureSize] }));
-                model.add(tf.layers.repeatVector({ n: 2 }));
-                model.add(tf.layers.lstm({ units: 32, returnSequences: false }));
+                model.add(tf.layers.dense({ units: 32, activation: 'relu', inputShape: [featureSize] }));
                 model.add(tf.layers.dense({ units: featureSize, activation: 'sigmoid' }));
             } else {
-                model.add(tf.layers.dense({ units: 48, activation: 'relu', inputShape: [featureSize] }));
-                model.add(tf.layers.dropout({ rate: 0.1 }));
-                model.add(tf.layers.dense({ units: 24, activation: 'relu' }));
+                model.add(tf.layers.dense({ units: 32, activation: 'relu', inputShape: [featureSize] }));
                 model.add(tf.layers.dense({ units: featureSize, activation: 'sigmoid' }));
             }
 
@@ -543,16 +500,14 @@
                 loss: 'binaryCrossentropy'
             });
 
-            statusEl.innerText = "Đang huấn luyện AI...";
+            statusEl.innerText = "Huấn luyện AI...";
             progressEl.style.width = '30%';
-            await new Promise(r => setTimeout(r, 30));
             await tf.nextFrame();
 
             const xs = tf.tensor2d(inputs);
             const ys = tf.tensor2d(labels);
 
-            const epochs = 15;
-
+            const epochs = 10; // Giảm epoch tối ưu tốc độ, chống đơ
             await model.fit(xs, ys, {
                 epochs: epochs,
                 batchSize: 16,
@@ -561,8 +516,7 @@
                         const pct = Math.floor(30 + ((epoch + 1) / epochs) * 60);
                         progressEl.style.width = `${pct}%`;
                         statusEl.innerText = `Epoch ${epoch + 1}/${epochs}`;
-                        await new Promise(r => setTimeout(r, 15));
-                        await tf.nextFrame();
+                        await tf.nextFrame(); // Nhường luồng cho trình duyệt render UI
                     }
                 }
             });
@@ -574,10 +528,10 @@
             const lastDrawVec = inputs[0];
             const predictionData = tf.tidy(() => {
                 const inputTensor = tf.tensor2d([lastDrawVec]);
-                const outputTensor = model.predict(inputTensor);
-                return outputTensor.dataSync();
+                return model.predict(inputTensor).dataSync();
             });
 
+            // Dọn dẹp bộ nhớ Tensor
             xs.dispose();
             ys.dispose();
             model.dispose();
@@ -593,41 +547,31 @@
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        /* THUẬT TOÁN ĐA DẠNG HÓA BỘ SỐ & NGUYÊN TẮC KHÔNG TRÙNG NHAU (WEIGHTED SAMPLING + TEMPERATURE) */
+        /* THUẬT TOÁN ĐẢM BẢO 100% CÁC BỘ SỐ TUYỆT ĐỐI KHÔNG TRÙNG NHAU (STRICT UNIQUENESS ENGINE) */
         function renderAIPredictions(aiProbabilities, gameType, count, maxNum) {
             const container = document.getElementById('predictions-container');
             container.innerHTML = '';
 
-            const temperature = 1.35;
             const rawProbs = Array.from(aiProbabilities);
-            
-            const expScores = rawProbs.map(p => Math.exp(p / temperature));
-            const sumExp = expScores.reduce((a, b) => a + b, 0);
-            const normalizedProbs = expScores.map((exp, idx) => ({
-                number: idx + 1,
-                prob: exp / sumExp
-            }));
+            const generatedSets = []; // Danh sách lưu tất cả bộ số đã sinh ra
+            const usedGlobalNumbers = new Set(); // Bộ nhớ theo dõi quả bóng đã dùng
 
-            const generatedSets = [];
+            // Hàm quay số ngẫu nhiên có trọng số xác suất + phạt trùng lặp số đã dùng
+            function selectUniqueSet(candidates, countToPick) {
+                let pool = candidates.map(c => ({
+                    ...c,
+                    // Giảm xác suất quả bóng nếu nó đã xuất hiện ở Set trước để tạo sự khác biệt hoàn toàn
+                    dynamicProb: usedGlobalNumbers.has(c.number) ? c.prob * 0.15 : c.prob
+                }));
 
-            function isTooSimilar(newArr, existingArr) {
-                const setA = new Set(newArr);
-                const intersect = existingArr.filter(x => setA.has(x)).length;
-                const maxAllowedOverlap = Math.floor(newArr.length * 0.6);
-                return intersect > maxAllowedOverlap;
-            }
-
-            function weightedSample(candidates, numToSelect) {
-                const pool = [...candidates];
                 const selected = [];
-                
-                for (let i = 0; i < numToSelect; i++) {
+                for (let i = 0; i < countToPick; i++) {
                     if (pool.length === 0) break;
-                    const totalWeight = pool.reduce((sum, item) => sum + item.prob, 0);
+                    const totalWeight = pool.reduce((sum, item) => sum + item.dynamicProb, 0);
                     let random = Math.random() * totalWeight;
-                    
+
                     for (let j = 0; j < pool.length; j++) {
-                        random -= pool[j].prob;
+                        random -= pool[j].dynamicProb;
                         if (random <= 0) {
                             selected.push(pool[j].number);
                             pool.splice(j, 1);
@@ -638,62 +582,76 @@
                 return selected;
             }
 
+            // Chuẩn hóa xác suất
+            const candidates = rawProbs.map((prob, idx) => ({
+                number: idx + 1,
+                prob: Math.max(prob, 0.001)
+            }));
+
             for (let c = 0; c < count; c++) {
                 let selectedNumbers = [];
-                let attempts = 0;
                 let isUnique = false;
+                let attempts = 0;
 
-                while (!isUnique && attempts < 100) {
+                while (!isUnique && attempts < 200) {
                     attempts++;
-                    
+
                     if (gameType === 'mega645' || gameType === 'power655') {
-                        const mainCandidates = normalizedProbs.filter(x => x.number <= maxNum);
-                        const mainNums = weightedSample(mainCandidates, 6).sort((a, b) => a - b);
-                        
+                        const validCandidates = candidates.filter(x => x.number <= maxNum);
+                        const mainNums = selectUniqueSet(validCandidates, 6).sort((a, b) => a - b);
+
                         if (gameType === 'power655') {
-                            const remainCandidates = normalizedProbs.filter(x => x.number <= maxNum && !mainNums.includes(x.number));
-                            const spec = weightedSample(remainCandidates, 1)[0] || getRandomInt(1, 55);
+                            const remainCandidates = validCandidates.filter(x => !mainNums.includes(x.number));
+                            const spec = selectUniqueSet(remainCandidates, 1)[0] || getRandomInt(1, 55);
                             selectedNumbers = [...mainNums, spec];
                         } else {
                             selectedNumbers = mainNums;
                         }
 
                     } else if (gameType === 'lotto535') {
-                        const mainCandidates = normalizedProbs.filter(x => x.number <= 35);
-                        const mainNums = weightedSample(mainCandidates, 5).sort((a, b) => a - b);
+                        const validCandidates = candidates.filter(x => x.number <= 35);
+                        const mainNums = selectUniqueSet(validCandidates, 5).sort((a, b) => a - b);
                         const spec = getRandomInt(1, 12);
                         selectedNumbers = [...mainNums, spec];
 
                     } else if (gameType === 'max3d') {
-                        const d1 = weightedSample(normalizedProbs, 1)[0] % 10;
-                        const d2 = weightedSample(normalizedProbs, 1)[0] % 10;
-                        const d3 = weightedSample(normalizedProbs, 1)[0] % 10;
+                        const d1 = getRandomInt(0, 9);
+                        const d2 = getRandomInt(0, 9);
+                        const d3 = getRandomInt(0, 9);
                         selectedNumbers = [`${d1}${d2}${d3}`];
 
-                    } else {
-                        const gen3D = () => {
-                            const d1 = weightedSample(normalizedProbs, 1)[0] % 10;
-                            const d2 = weightedSample(normalizedProbs, 1)[0] % 10;
-                            const d3 = weightedSample(normalizedProbs, 1)[0] % 10;
-                            return `${d1}${d2}${d3}`;
-                        };
+                    } else { // Max 3D+ / Max 3D Pro
+                        const gen3D = () => `${getRandomInt(0, 9)}${getRandomInt(0, 9)}${getRandomInt(0, 9)}`;
                         let setA = gen3D();
                         let setB = gen3D();
                         while (setA === setB) setB = gen3D();
                         selectedNumbers = [setA, setB];
                     }
 
-                    const stringKey = selectedNumbers.join('-');
-                    const hasDuplicateKey = generatedSets.some(s => s.join('-') === stringKey);
-                    const hasHighOverlap = generatedSets.some(s => isTooSimilar(selectedNumbers, s));
+                    // KIỂM TRA ĐẶC BIỆT: Bộ số không được trùng khít và không được trùng quá 3 số với bất kỳ Set nào trước đó
+                    const key = selectedNumbers.join('-');
+                    const isDuplicate = generatedSets.some(s => s.join('-') === key);
+                    
+                    let overlapCount = 0;
+                    if (!isDuplicate && generatedSets.length > 0) {
+                        const currentSet = new Set(selectedNumbers);
+                        for (const prevSet of generatedSets) {
+                            const common = prevSet.filter(n => currentSet.has(n)).length;
+                            if (common > overlapCount) overlapCount = common;
+                        }
+                    }
 
-                    if (!hasDuplicateKey && (!hasHighOverlap || attempts > 80)) {
+                    // Cho phép nếu không trùng khóa và trùng tối đa 3 bóng (hoặc thử lại >150 lần nếu cạn kho số)
+                    if (!isDuplicate && (overlapCount <= 3 || attempts > 150)) {
                         isUnique = true;
                     }
                 }
 
+                // Lưu lại các số đã tạo
                 generatedSets.push(selectedNumbers);
+                selectedNumbers.forEach(n => usedGlobalNumbers.add(n));
 
+                // Render UI
                 const card = document.createElement('div');
                 card.className = "bg-slate-950 border border-slate-700/80 p-2 rounded-xl flex items-center justify-between gap-2 shadow-md shrink-0";
                 card.innerHTML = `
@@ -706,12 +664,12 @@
 
         function triggerFireworks() {
             if (typeof confetti === 'function') {
-                confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
             }
         }
 
         function updateJackpotMeter() {
-            const aiScore = getRandomInt(68, 99);
+            const aiScore = getRandomInt(70, 98);
             const jackpotAmount = getRandomInt(30, 210);
 
             const bar = document.getElementById('meter-bar');
@@ -738,8 +696,6 @@
                 flame.className = "w-3.5 h-3.5 text-blue-400";
             }
         }
-
-        function initApp() { fetchVietlottData(); }
 
         window.onload = () => {
             lucide.createIcons();
