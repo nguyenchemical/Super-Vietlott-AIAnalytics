@@ -11,6 +11,18 @@
     <link rel="dns-prefetch" href="https://unpkg.com">
     <meta name="theme-color" content="#0f172a">
 
+    <!-- CẤU HÌNH ICON MÀN HÌNH CHÍNH (ANDROID & IOS PWA SAFE) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Vietlott AI">
+    <meta name="application-name" content="Vietlott AI">
+
+    <!-- Embed SVG Icon trực tiếp chống mất icon khi tạo Lối Tắt / Bookmark -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%23dc2626'/><circle cx='256' cy='256' r='180' fill='%23991b1b'/><circle cx='256' cy='256' r='140' fill='%23f59e0b'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='190' font-weight='900' fill='%23ffffff'>AI</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%23dc2626'/><circle cx='256' cy='256' r='180' fill='%23991b1b'/><circle cx='256' cy='256' r='140' fill='%23f59e0b'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='190' font-weight='900' fill='%23ffffff'>AI</text></svg>">
+    <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='110' fill='%23dc2626'/><circle cx='256' cy='256' r='180' fill='%23991b1b'/><circle cx='256' cy='256' r='140' fill='%23f59e0b'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='190' font-weight='900' fill='%23ffffff'>AI</text></svg>">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -129,7 +141,7 @@
                     <span class="text-xs font-semibold text-slate-300 pl-1">Bộ số muốn tạo</span>
                     <div class="flex items-center gap-2">
                         <button type="button" onclick="adjustTicketCount(-1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-extrabold flex items-center justify-center transition">&minus;</button>
-                        <span id="ticket-count-display" class="w-5 text-center text-amber-400 font-extrabold text-sm font-mono">3</span>
+                        <span id="ticket-count-display" class="w-5 text-center text-amber-400 font-extrabold text-sm font-mono">2</span>
                         <button type="button" onclick="adjustTicketCount(1)" class="w-7 h-7 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 font-extrabold flex items-center justify-center transition">&#43;</button>
                     </div>
                 </div>
@@ -235,9 +247,10 @@
         let rawDraws = [];
         let chartInstance = null;
         let timerInterval = null;
-        let currentTicketCount = 3;
+        
+        // Mặc định số lượng bộ số là 2
+        let currentTicketCount = 2;
 
-        // Khởi tạo TensorFlow.js nhanh, chống treo lag
         tf.ready().then(async () => {
             try {
                 await tf.setBackend('webgl');
@@ -311,7 +324,6 @@
             timerInterval = setInterval(updateTimer, 1000);
         }
 
-        // Tạo dữ liệu ngay lập tức, không để mạng chậm làm gián đoạn ứng dụng
         function initApp() {
             const gameType = document.getElementById('game-type').value;
             rawDraws = generateSyntheticData(gameType);
@@ -437,7 +449,6 @@
             });
         }
 
-        // Huấn luyện không gây đóng băng UI (Async + Yielding)
         async function trainAndPredict() {
             const btn = document.getElementById('btn-train');
             const statusEl = document.getElementById('training-status');
@@ -507,7 +518,7 @@
             const xs = tf.tensor2d(inputs);
             const ys = tf.tensor2d(labels);
 
-            const epochs = 10; // Giảm epoch tối ưu tốc độ, chống đơ
+            const epochs = 10;
             await model.fit(xs, ys, {
                 epochs: epochs,
                 batchSize: 16,
@@ -516,7 +527,7 @@
                         const pct = Math.floor(30 + ((epoch + 1) / epochs) * 60);
                         progressEl.style.width = `${pct}%`;
                         statusEl.innerText = `Epoch ${epoch + 1}/${epochs}`;
-                        await tf.nextFrame(); // Nhường luồng cho trình duyệt render UI
+                        await tf.nextFrame();
                     }
                 }
             });
@@ -531,7 +542,6 @@
                 return model.predict(inputTensor).dataSync();
             });
 
-            // Dọn dẹp bộ nhớ Tensor
             xs.dispose();
             ys.dispose();
             model.dispose();
@@ -547,20 +557,17 @@
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
         }
 
-        /* THUẬT TOÁN ĐẢM BẢO 100% CÁC BỘ SỐ TUYỆT ĐỐI KHÔNG TRÙNG NHAU (STRICT UNIQUENESS ENGINE) */
         function renderAIPredictions(aiProbabilities, gameType, count, maxNum) {
             const container = document.getElementById('predictions-container');
             container.innerHTML = '';
 
             const rawProbs = Array.from(aiProbabilities);
-            const generatedSets = []; // Danh sách lưu tất cả bộ số đã sinh ra
-            const usedGlobalNumbers = new Set(); // Bộ nhớ theo dõi quả bóng đã dùng
+            const generatedSets = [];
+            const usedGlobalNumbers = new Set();
 
-            // Hàm quay số ngẫu nhiên có trọng số xác suất + phạt trùng lặp số đã dùng
             function selectUniqueSet(candidates, countToPick) {
                 let pool = candidates.map(c => ({
                     ...c,
-                    // Giảm xác suất quả bóng nếu nó đã xuất hiện ở Set trước để tạo sự khác biệt hoàn toàn
                     dynamicProb: usedGlobalNumbers.has(c.number) ? c.prob * 0.15 : c.prob
                 }));
 
@@ -582,7 +589,6 @@
                 return selected;
             }
 
-            // Chuẩn hóa xác suất
             const candidates = rawProbs.map((prob, idx) => ({
                 number: idx + 1,
                 prob: Math.max(prob, 0.001)
@@ -620,7 +626,7 @@
                         const d3 = getRandomInt(0, 9);
                         selectedNumbers = [`${d1}${d2}${d3}`];
 
-                    } else { // Max 3D+ / Max 3D Pro
+                    } else {
                         const gen3D = () => `${getRandomInt(0, 9)}${getRandomInt(0, 9)}${getRandomInt(0, 9)}`;
                         let setA = gen3D();
                         let setB = gen3D();
@@ -628,7 +634,6 @@
                         selectedNumbers = [setA, setB];
                     }
 
-                    // KIỂM TRA ĐẶC BIỆT: Bộ số không được trùng khít và không được trùng quá 3 số với bất kỳ Set nào trước đó
                     const key = selectedNumbers.join('-');
                     const isDuplicate = generatedSets.some(s => s.join('-') === key);
                     
@@ -641,17 +646,14 @@
                         }
                     }
 
-                    // Cho phép nếu không trùng khóa và trùng tối đa 3 bóng (hoặc thử lại >150 lần nếu cạn kho số)
                     if (!isDuplicate && (overlapCount <= 3 || attempts > 150)) {
                         isUnique = true;
                     }
                 }
 
-                // Lưu lại các số đã tạo
                 generatedSets.push(selectedNumbers);
                 selectedNumbers.forEach(n => usedGlobalNumbers.add(n));
 
-                // Render UI
                 const card = document.createElement('div');
                 card.className = "bg-slate-950 border border-slate-700/80 p-2 rounded-xl flex items-center justify-between gap-2 shadow-md shrink-0";
                 card.innerHTML = `
