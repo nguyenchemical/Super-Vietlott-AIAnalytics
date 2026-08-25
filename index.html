@@ -15,7 +15,7 @@
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Vietlott AI">
     <meta name="application-name" content="Vietlott AI">
 
@@ -34,8 +34,25 @@
 
     <style>
         * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-sizing: border-box; }
-        html { height: 100%; -webkit-text-size-adjust: 100%; }
-        body { min-height: 100%; min-height: -webkit-fill-available; margin: 0; padding: 0; display: flex; flex-direction: column; background-color: #0f172a; }
+        
+        /* Fix iOS Fullscreen Safe Area Inset */
+        html { 
+            height: 100%; 
+            -webkit-text-size-adjust: 100%; 
+        }
+        body { 
+            min-height: 100%; 
+            min-height: -webkit-fill-available; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            flex-direction: column; 
+            background-color: #0f172a; 
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
 
         .ball {
             width: 36px; height: 36px; border-radius: 50%;
@@ -52,7 +69,10 @@
         .ball-power-special { background: radial-gradient(circle at 35% 35%, #fb7185, #e11d48, #9f1239); color: white; border: 2px solid #fde047; }
         .ball-lotto { background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a, #14532d); color: white; }
         .ball-lotto-special { background: radial-gradient(circle at 35% 35%, #ff8c00, #ea580c, #9a3412); color: white; }
-        .ball-max3d { background: radial-gradient(circle at 35% 35%, #f0abfc, #c026d3, #701a75); color: white; }
+        
+        /* Cập nhật màu quả bóng Max 3D chuẩn app Vietlott (Xanh dương 3D) */
+        .ball-max3d { background: radial-gradient(circle at 35% 35%, #38bdf8, #0284c7, #075985); color: white; }
+        
         .divider-3d { display: inline-block; width: 2px; height: 24px; background-color: #64748b; margin: 0 4px; align-self: center; flex-shrink: 0; }
         
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -63,7 +83,7 @@
 <body class="bg-slate-900 text-slate-100 font-sans antialiased">
 
     <!-- Header App Compact Sticky -->
-    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 py-2 px-3">
+    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 py-2.5 px-3">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
                 <div class="p-1.5 bg-red-600 rounded-lg text-white shadow-md flex items-center justify-center">
@@ -424,7 +444,7 @@
         function renderChart(freqs, gameType) {
             const ctx = document.getElementById('frequencyChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-            let barColor = gameType === 'power655' ? '#d97706' : (gameType === 'lotto535' ? '#16a34a' : (gameType.startsWith('max3d') ? '#c026d3' : '#ef4444'));
+            let barColor = gameType === 'power655' ? '#d97706' : (gameType === 'lotto535' ? '#16a34a' : (gameType.startsWith('max3d') ? '#0284c7' : '#ef4444'));
 
             chartInstance = new Chart(ctx, {
                 type: 'bar',
