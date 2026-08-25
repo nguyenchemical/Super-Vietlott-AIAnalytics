@@ -58,7 +58,7 @@
             width: 36px; height: 36px; border-radius: 50%;
             display: inline-flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 0.95rem;
-            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: inset -2px -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
             margin: 1.5px; flex-shrink: 0;
             -webkit-backface-visibility: hidden; backface-visibility: hidden;
         }
@@ -70,8 +70,8 @@
         .ball-lotto { background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a, #14532d); color: white; }
         .ball-lotto-special { background: radial-gradient(circle at 35% 35%, #ff8c00, #ea580c, #9a3412); color: white; }
         
-        /* Cập nhật màu quả bóng Max 3D chuẩn app Vietlott (Xanh dương 3D) */
-        .ball-max3d { background: radial-gradient(circle at 35% 35%, #38bdf8, #0284c7, #075985); color: white; }
+        /* Cập nhật màu bóng Max 3D: Tím đậm ở rìa và sáng dần thành màu hồng tím ở tâm */
+        .ball-max3d { background: radial-gradient(circle at 35% 35%, #d946ef, #c026d3, #701a75, #4a044e); color: white; }
         
         .divider-3d { display: inline-block; width: 2px; height: 24px; background-color: #64748b; margin: 0 4px; align-self: center; flex-shrink: 0; }
         
@@ -444,7 +444,7 @@
         function renderChart(freqs, gameType) {
             const ctx = document.getElementById('frequencyChart').getContext('2d');
             if (chartInstance) chartInstance.destroy();
-            let barColor = gameType === 'power655' ? '#d97706' : (gameType === 'lotto535' ? '#16a34a' : (gameType.startsWith('max3d') ? '#0284c7' : '#ef4444'));
+            let barColor = gameType === 'power655' ? '#d97706' : (gameType === 'lotto535' ? '#16a34a' : (gameType.startsWith('max3d') ? '#c026d3' : '#ef4444'));
 
             chartInstance = new Chart(ctx, {
                 type: 'bar',
