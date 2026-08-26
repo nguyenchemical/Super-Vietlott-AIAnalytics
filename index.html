@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Vietlott Deep Learning AI Predictor Pro</title>
     
-    <!-- Tối ưu tốc độ tải CDN -->
     <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     <link rel="dns-prefetch" href="https://unpkg.com">
     <meta name="theme-color" content="#0f172a">
 
-    <!-- Cấu hình Manifest & App Icon -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -31,22 +29,12 @@
     <style>
         * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-sizing: border-box; }
         
-        html { 
-            height: 100%; 
-            -webkit-text-size-adjust: 100%; 
-        }
+        html { height: 100%; -webkit-text-size-adjust: 100%; }
         body { 
-            min-height: 100%; 
-            min-height: -webkit-fill-available; 
-            margin: 0; 
-            padding: 0; 
-            display: flex; 
-            flex-direction: column; 
-            background-color: #0f172a; 
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
+            min-height: 100%; min-height: -webkit-fill-available; margin: 0; padding: 0; 
+            display: flex; flex-direction: column; background-color: #0f172a; 
+            padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right);
         }
 
         .ball {
@@ -54,8 +42,7 @@
             display: inline-flex; align-items: center; justify-content: center;
             font-weight: 800; font-size: 0.95rem;
             box-shadow: inset -2px -2px 4px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.4);
-            margin: 1.5px; flex-shrink: 0;
-            -webkit-backface-visibility: hidden; backface-visibility: hidden;
+            margin: 1.5px; flex-shrink: 0; backface-visibility: hidden;
         }
         @media (min-width: 640px) { .ball { width: 42px; height: 42px; font-size: 1.1rem; margin: 2px; } }
 
@@ -65,9 +52,7 @@
         .ball-lotto { background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a, #14532d); color: white; }
         .ball-lotto-special { background: radial-gradient(circle at 35% 35%, #ff8c00, #ea580c, #9a3412); color: white; }
         .ball-max3d { background: radial-gradient(circle at 35% 35%, #d946ef, #c026d3, #701a75, #4a044e); color: white; }
-        
         .divider-3d { display: inline-block; width: 2px; height: 24px; background-color: #64748b; margin: 0 4px; align-self: center; flex-shrink: 0; }
-        
         .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -75,7 +60,6 @@
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans antialiased">
 
-    <!-- Header App -->
     <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur-md shrink-0 py-2.5 px-3">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-2">
@@ -86,7 +70,7 @@
                     <h1 class="text-xs sm:text-base font-extrabold bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 bg-clip-text text-transparent leading-none">
                         VIETLOTT TENSORFLOW AI
                     </h1>
-                    <p class="text-[9px] sm:text-[10px] text-slate-400">Realtime Deep Learning Predictor (Online Live Data)</p>
+                    <p class="text-[9px] sm:text-[10px] text-slate-400">Local JSON Data Sync (GitHub Actions Live)</p>
                 </div>
             </div>
             
@@ -94,21 +78,16 @@
                 <button onclick="toggleStatsModal(true)" class="px-2 py-1 text-[11px] font-bold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg border border-indigo-500/30 transition flex items-center gap-1">
                     <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> <span>Thống kê</span>
                 </button>
-                <span id="data-status" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
-                    <span>Đang kết nối Vietlott...</span>
+                <span id="data-status" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>Local Data JSON</span>
                 </span>
             </div>
         </div>
     </header>
 
-    <!-- Main Dashboard -->
     <main class="max-w-6xl mx-auto w-full px-2 sm:px-4 py-2 flex-1 grid grid-cols-1 md:grid-cols-12 gap-2">
-
-        <!-- CỘT TRÁI: Bàn Điều Khiển -->
         <div class="md:col-span-5 flex flex-col gap-2">
-            
-            <!-- Lịch quay -->
             <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 p-2 rounded-xl shrink-0 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <div class="p-1.5 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20 shrink-0">
@@ -124,7 +103,6 @@
                 </div>
             </div>
 
-            <!-- Chọn Game -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="sliders" class="w-3 h-3 text-red-500"></i> Loại hình xổ số
@@ -139,7 +117,6 @@
                 </select>
             </div>
 
-            <!-- Thuật toán AI (Mặc định Time Series Tensor) -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i> Thuật toán AI Model
@@ -150,7 +127,6 @@
                 </select>
             </div>
 
-            <!-- Số lượng bộ số -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-300 mb-1">SỐ LƯỢNG BỘ SỐ DỰ ĐOÁN</label>
                 <div class="bg-slate-950 border border-slate-700/80 rounded-lg p-1.5 flex items-center justify-between">
@@ -163,7 +139,6 @@
                 </div>
             </div>
 
-            <!-- Backend & Progress -->
             <div class="bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-[10px] space-y-1 shrink-0">
                 <div class="text-slate-400 flex justify-between">
                     <span>Engine: <b id="tf-backend" class="text-emerald-400">Initializing...</b></span>
@@ -175,9 +150,7 @@
             </div>
         </div>
 
-        <!-- CỘT PHẢI: Kết Quả Dự Đoán -->
         <div class="md:col-span-7 flex flex-col gap-2 min-h-0">
-            
             <div class="bg-slate-800/80 border border-slate-700/80 p-2.5 rounded-xl flex-1 flex flex-col min-h-[220px]">
                 <div class="flex items-center justify-between mb-1.5 shrink-0">
                     <h2 class="text-xs font-bold uppercase text-amber-400 flex items-center gap-1">
@@ -192,7 +165,6 @@
                 </div>
             </div>
 
-            <!-- Jackpot Meter -->
             <div id="jackpot-meter-card" class="bg-slate-950 border border-slate-800 p-2 rounded-xl space-y-1 shrink-0">
                 <div class="flex justify-between items-center">
                     <div class="flex items-center gap-1">
@@ -210,23 +182,19 @@
                 </div>
             </div>
 
-            <!-- Nút bấm chạy AI -->
             <div class="shrink-0 mb-2 md:mb-0">
                 <button id="btn-train" onclick="trainAndPredict()" class="w-full py-2.5 sm:py-3 bg-gradient-to-r from-red-600 via-amber-500 to-emerald-500 active:opacity-90 hover:from-red-500 hover:to-emerald-400 font-extrabold text-white rounded-xl shadow-lg shadow-red-600/20 transition flex items-center justify-center gap-2 text-xs sm:text-sm uppercase tracking-wider">
                     <i data-lucide="cpu" class="w-4 h-4"></i> HUẤN LUYỆN TENSORFLOW AI
                 </button>
             </div>
-
         </div>
-
     </main>
 
-    <!-- Modal Thống Kê -->
     <div id="stats-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-3">
         <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
             <div class="px-4 py-2.5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
                 <h3 class="text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-2">
-                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-400"></i> Thống kê & Lịch sử Vietlott Live
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-400"></i> Thống kê & Lịch sử Vietlott JSON
                 </h3>
                 <button onclick="toggleStatsModal(false)" class="p-1 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -234,13 +202,13 @@
             </div>
             <div class="p-3 space-y-3 overflow-y-auto custom-scrollbar flex-1">
                 <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                    <h4 class="text-xs font-bold text-slate-300 mb-2">Biểu đồ tần suất xuất hiện số (Từ Data Thật)</h4>
+                    <h4 class="text-xs font-bold text-slate-300 mb-2">Biểu đồ tần suất xuất hiện số</h4>
                     <div class="h-40 w-full">
                         <canvas id="frequencyChart"></canvas>
                     </div>
                 </div>
                 <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                    <h4 class="text-xs font-bold text-slate-300 mb-2">Lịch sử kết quả thực tế từ Vietlott API</h4>
+                    <h4 class="text-xs font-bold text-slate-300 mb-2">Lịch sử kết quả (Nạp từ data.json)</h4>
                     <div class="overflow-x-auto max-h-40 custom-scrollbar">
                         <table class="w-full text-xs text-left text-slate-300 min-w-[380px]">
                             <thead class="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0">
@@ -258,28 +226,14 @@
         </div>
     </div>
 
-    <!-- Script Xử Lý Logic AI & Realtime Data -->
     <script>
         let rawDraws = [];
         let chartInstance = null;
         let timerInterval = null;
         let currentTicketCount = 2;
 
-        const VIETLOTT_GAME_CODES = {
-            'mega645': '645',
-            'power655': '655',
-            'max3d': '3d',
-            'max3dplus': '3dplus',
-            'max3dpro': '3dpro',
-            'lotto535': '535'
-        };
-
         tf.ready().then(async () => {
-            try {
-                await tf.setBackend('webgl');
-            } catch (e) {
-                await tf.setBackend('cpu');
-            }
+            try { await tf.setBackend('webgl'); } catch (e) { await tf.setBackend('cpu'); }
             document.getElementById('tf-backend').innerText = tf.getBackend().toUpperCase();
         });
 
@@ -290,64 +244,45 @@
 
         function toggleStatsModal(show) {
             const modal = document.getElementById('stats-modal');
-            if (show) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
+            if (show) modal.classList.remove('hidden'); else modal.classList.add('hidden');
         }
 
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // TẢI DỮ LIỆU THỜI GIAN THỰC ONLINE 100%
+        // NẠP DỮ LIỆU TỰ ĐỘNG TỪ TỆP DATA.JSON NỘI BỘ (GITHUB PAGES)
         async function initApp() {
             const gameType = document.getElementById('game-type').value;
             const statusEl = document.getElementById('data-status');
             
-            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>Đang kết nối Vietlott...</span>`;
+            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>Đang tải data.json...</span>`;
             statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
 
             try {
-                rawDraws = await fetchRealVietlottData(gameType);
-                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Online Live API</span>`;
+                rawDraws = await fetchLocalJSONData(gameType);
+                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>JSON Synced</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
             } catch (error) {
-                console.warn("Chuyển sang bộ dữ liệu ngẫu nhiên dự phòng:", error);
+                console.warn("Không thể tải file data.json local, dùng dữ liệu dự phòng:", error);
                 rawDraws = generateSyntheticData(gameType);
-                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>Data Backup</span>`;
+                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>Backup Data</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20";
             }
 
             renderAll();
         }
 
-        async function fetchRealVietlottData(gameType) {
-            const code = VIETLOTT_GAME_CODES[gameType] || '645';
-            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+        async function fetchLocalJSONData(gameType) {
+            const response = await fetch(`./data.json?t=${Date.now()}`, { cache: 'no-cache' });
+            if (!response.ok) throw new Error("Không nạp được file data.json");
 
-            const response = await fetch(proxyUrl, { cache: 'no-cache' });
-            if (!response.ok) throw new Error("Không kết nối được server Vietlott");
+            const allData = await response.json();
+            const gameData = allData[gameType];
 
-            const data = await response.json();
-            if (!data || !data.resultList || data.resultList.length === 0) {
-                throw new Error("Dữ liệu rỗng");
+            if (!gameData || !Array.isArray(gameData) || gameData.length === 0) {
+                throw new Error("Dữ liệu game trống hoặc sai định dạng");
             }
 
-            return data.resultList.map(item => {
-                let parsedNumbers = [];
-                if (typeof item.ResultNumbers === 'string') {
-                    parsedNumbers = item.ResultNumbers.split(/[\s,|-]+/).map(n => n.trim()).filter(Boolean);
-                    if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
-                        parsedNumbers = parsedNumbers.map(n => parseInt(n, 10));
-                    }
-                } else if (Array.isArray(item.ResultNumbers)) {
-                    parsedNumbers = item.ResultNumbers;
-                }
-
-                return {
-                    id: `#${item.DrawId || item.id || '0000'}`,
-                    date: item.DrawDate || item.date || new Date().toLocaleDateString('vi-VN'),
-                    numbers: parsedNumbers
-                };
-            });
+            return gameData;
         }
 
         function generateSyntheticData(gameType) {
@@ -525,7 +460,6 @@
             const statusEl = document.getElementById('training-status');
             const progressEl = document.getElementById('training-progress');
             const gameType = document.getElementById('game-type').value;
-            const algoType = document.getElementById('algo-type').value;
 
             if (!rawDraws || rawDraws.length < 2) {
                 alert("Dữ liệu chưa tải xong hoặc không đủ để huấn luyện!");
@@ -733,9 +667,7 @@
         }
 
         function triggerFireworks() {
-            if (typeof confetti === 'function') {
-                confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
-            }
+            if (typeof confetti === 'function') confetti({ particleCount: 60, spread: 50, origin: { y: 0.6 } });
         }
 
         function updateJackpotMeter() {
