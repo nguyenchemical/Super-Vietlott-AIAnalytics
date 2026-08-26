@@ -70,7 +70,7 @@
         .ball-lotto { background: radial-gradient(circle at 35% 35%, #4ade80, #16a34a, #14532d); color: white; }
         .ball-lotto-special { background: radial-gradient(circle at 35% 35%, #ff8c00, #ea580c, #9a3412); color: white; }
         
-        /* Cập nhật màu bóng Max 3D: Tím đậm ở rìa và sáng dần thành màu hồng tím ở tâm */
+        /* Màu bóng Max 3D: Tím đậm ở rìa và sáng dần thành màu hồng tím ở tâm */
         .ball-max3d { background: radial-gradient(circle at 35% 35%, #d946ef, #c026d3, #701a75, #4a044e); color: white; }
         
         .divider-3d { display: inline-block; width: 2px; height: 24px; background-color: #64748b; margin: 0 4px; align-self: center; flex-shrink: 0; }
@@ -146,14 +146,14 @@
                 </select>
             </div>
 
-            <!-- Thuật toán AI Model -->
+            <!-- Thuật toán AI Model (Đặt Time Series Tensor Pattern làm mặc định) -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i> Thuật toán AI Model
                 </label>
                 <select id="algo-type" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs font-medium focus:ring-1 focus:ring-red-500 outline-none text-slate-200">
+                    <option value="tf-lstm" selected>Time Series Tensor Pattern Model</option>
                     <option value="tf-dense">Fast Light Deep Neural Network</option>
-                    <option value="tf-lstm">Time Series Tensor Pattern Model</option>
                 </select>
             </div>
 
