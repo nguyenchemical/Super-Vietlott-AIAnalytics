@@ -28,7 +28,6 @@
 
     <style>
         * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; box-sizing: border-box; }
-        
         html { height: 100%; -webkit-text-size-adjust: 100%; }
         body { 
             min-height: 100%; min-height: -webkit-fill-available; margin: 0; padding: 0; 
@@ -70,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-extrabold bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 bg-clip-text text-transparent leading-none">
                         VIETLOTT TENSORFLOW AI
                     </h1>
-                    <p class="text-[9px] sm:text-[10px] text-slate-400">Local JSON Data Sync (GitHub Actions Live)</p>
+                    <p class="text-[9px] sm:text-[10px] text-slate-400">Smart Live Proxy Engine</p>
                 </div>
             </div>
             
@@ -80,7 +79,7 @@
                 </button>
                 <span id="data-status" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Local Data JSON</span>
+                    <span>Live Online</span>
                 </span>
             </div>
         </div>
@@ -194,7 +193,7 @@
         <div class="bg-slate-900 border border-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden">
             <div class="px-4 py-2.5 border-b border-slate-800 flex justify-between items-center bg-slate-950">
                 <h3 class="text-xs sm:text-sm font-bold text-slate-100 flex items-center gap-2">
-                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-400"></i> Thống kê & Lịch sử Vietlott JSON
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-400"></i> Thống kê & Lịch sử Vietlott Live
                 </h3>
                 <button onclick="toggleStatsModal(false)" class="p-1 text-slate-400 hover:text-slate-100 rounded-lg hover:bg-slate-800">
                     <i data-lucide="x" class="w-5 h-5"></i>
@@ -208,7 +207,7 @@
                     </div>
                 </div>
                 <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
-                    <h4 class="text-xs font-bold text-slate-300 mb-2">Lịch sử kết quả (Nạp từ data.json)</h4>
+                    <h4 class="text-xs font-bold text-slate-300 mb-2">Lịch sử kết quả trực tiếp</h4>
                     <div class="overflow-x-auto max-h-40 custom-scrollbar">
                         <table class="w-full text-xs text-left text-slate-300 min-w-[380px]">
                             <thead class="text-[10px] uppercase bg-slate-900 text-slate-400 sticky top-0">
@@ -249,20 +248,29 @@
 
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // NẠP DỮ LIỆU TỰ ĐỘNG TỪ TỆP DATA.JSON NỘI BỘ (GITHUB PAGES)
+        const gameCodeMap = {
+            mega645: "645",
+            power655: "655",
+            lotto535: "535",
+            max3d: "3d",
+            max3dplus: "3dplus",
+            max3dpro: "3dpro"
+        };
+
+        // KHỞI TẠO NẠP DỮ LIỆU ĐA CỔNG PROXY
         async function initApp() {
             const gameType = document.getElementById('game-type').value;
             const statusEl = document.getElementById('data-status');
             
-            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>Đang tải data.json...</span>`;
+            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>Đang tải API...</span>`;
             statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
 
             try {
-                rawDraws = await fetchLocalJSONData(gameType);
-                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>JSON Synced</span>`;
+                rawDraws = await fetchLiveVietlott(gameCodeMap[gameType]);
+                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Live Online</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
             } catch (error) {
-                console.warn("Không thể tải file data.json local, dùng dữ liệu dự phòng:", error);
+                console.warn("Không kết nối được API Live, nạp dữ liệu dự phòng:", error);
                 rawDraws = generateSyntheticData(gameType);
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>Backup Data</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20";
@@ -271,18 +279,37 @@
             renderAll();
         }
 
-        async function fetchLocalJSONData(gameType) {
-            const response = await fetch(`./data.json?t=${Date.now()}`, { cache: 'no-cache' });
-            if (!response.ok) throw new Error("Không nạp được file data.json");
+        async function fetchLiveVietlott(code) {
+            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
+            const proxies = [
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+            ];
 
-            const allData = await response.json();
-            const gameData = allData[gameType];
-
-            if (!gameData || !Array.isArray(gameData) || gameData.length === 0) {
-                throw new Error("Dữ liệu game trống hoặc sai định dạng");
+            for (const proxy of proxies) {
+                try {
+                    const res = await fetch(proxy);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data && data.resultList && data.resultList.length > 0) {
+                            return data.resultList.map(item => ({
+                                id: `#${item.DrawId || '0000'}`,
+                                date: item.DrawDate || new Date().toLocaleDateString('vi-VN'),
+                                numbers: parseVietlottNumbers(item.ResultNumbers)
+                            }));
+                        }
+                    }
+                } catch (e) {
+                    console.warn("Proxy lỗi, thử cổng tiếp theo...", e);
+                }
             }
+            throw new Error("Tất cả cổng Proxy đều bận");
+        }
 
-            return gameData;
+        function parseVietlottNumbers(str) {
+            if (!str) return [1, 2, 3, 4, 5, 6];
+            if (Array.isArray(str)) return str;
+            return String(str).split(/[\s,|-]+/).map(n => isNaN(n) ? n.trim() : parseInt(n, 10)).filter(Boolean);
         }
 
         function generateSyntheticData(gameType) {
