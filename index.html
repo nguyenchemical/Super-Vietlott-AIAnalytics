@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-extrabold bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 bg-clip-text text-transparent leading-none">
                         VIETLOTT TENSORFLOW AI
                     </h1>
-                    <p class="text-[9px] sm:text-[10px] text-slate-400">Smart Live Proxy Engine</p>
+                    <p class="text-[9px] sm:text-[10px] text-slate-400">Smart Data Engine</p>
                 </div>
             </div>
             
@@ -177,7 +177,7 @@
                 </div>
                 <div class="flex justify-between items-center text-[9px] text-slate-400">
                     <span>Hội tụ AI: <b id="meter-score-text" class="text-amber-400">72%</b></span>
-                    <span>Tích lũy ước tính: <b id="jackpot-val-display" class="text-slate-200">28 Tỷ VNĐ</b></span>
+                    <span>Tích lũy ước tính: <b id="jackpot-val-display" class="text-slate-200">184 Tỷ VNĐ</b></span>
                 </div>
             </div>
 
@@ -261,15 +261,15 @@
             const gameType = document.getElementById('game-type').value;
             const statusEl = document.getElementById('data-status');
             
-            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>Đang tải API...</span>`;
+            statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span><span>Đang kết nối...</span>`;
             statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20";
 
             try {
-                rawDraws = await fetchLiveVietlott(gameCodeMap[gameType]);
+                rawDraws = await fetchLiveVietlott(gameType);
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Live Online</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
             } catch (error) {
-                console.warn("API Live lỗi, dùng Backup:", error);
+                console.warn("Dùng dữ liệu giả lập:", error);
                 rawDraws = generateSyntheticData(gameType);
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>Backup Data</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20";
@@ -278,30 +278,43 @@
             renderAll();
         }
 
-        async function fetchLiveVietlott(code) {
-            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
-            const proxies = [
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-                `https://thingproxy.freeboard.io/fetch/${targetUrl}`,
-                `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`
+        async function fetchLiveVietlott(gameType) {
+            // Thử đọc dữ liệu trực tiếp từ file data.json trong kho lưu trữ
+            const sources = [
+                `./data.json?t=${Date.now()}`,
+                `data.json?t=${Date.now()}`
             ];
 
-            for (const proxy of proxies) {
+            for (const url of sources) {
                 try {
-                    const res = await fetch(proxy);
+                    const res = await fetch(url);
                     if (res.ok) {
-                        const text = await res.text();
-                        let data;
-                        try { data = JSON.parse(text); } catch(e) { continue; }
-                        
+                        const data = await res.json();
                         let list = null;
                         if (Array.isArray(data)) list = data;
+                        else if (data && data[gameType]) list = data[gameType];
                         else if (data && data.resultList) list = data.resultList;
-                        else if (data && data.contents) {
-                            try { list = JSON.parse(data.contents).resultList; } catch(e) {}
-                        }
 
+                        if (list && list.length > 0) {
+                            return list.map(item => ({
+                                id: item.id || `#${item.DrawId || '0000'}`,
+                                date: item.date || item.DrawDate || new Date().toLocaleDateString('vi-VN'),
+                                numbers: item.numbers || parseVietlottNumbers(item.ResultNumbers)
+                            }));
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // Thử cổng proxy trực tiếp với header chuẩn
+            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${gameCodeMap[gameType]}&page=1&limit=50`;
+            try {
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                if (res.ok) {
+                    const outer = await res.json();
+                    if (outer && outer.contents) {
+                        const data = JSON.parse(outer.contents);
+                        const list = data.resultList || (Array.isArray(data) ? data : []);
                         if (list && list.length > 0) {
                             return list.map(item => ({
                                 id: `#${item.DrawId || '0000'}`,
@@ -310,11 +323,10 @@
                             }));
                         }
                     }
-                } catch (e) {
-                    console.warn("Proxy kết nối thất bại:", e);
                 }
-            }
-            throw new Error("Không thể lấy dữ liệu trực tiếp từ Vietlott");
+            } catch (e) {}
+
+            throw new Error("Không thể tải được dữ liệu trực tiếp.");
         }
 
         function parseVietlottNumbers(str) {
