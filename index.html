@@ -69,7 +69,7 @@
                     <h1 class="text-xs sm:text-base font-extrabold bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 bg-clip-text text-transparent leading-none">
                         VIETLOTT TENSORFLOW AI
                     </h1>
-                    <p class="text-[9px] sm:text-[10px] text-slate-400">Smart Data Engine</p>
+                    <p class="text-[9px] sm:text-[10px] text-slate-400">Smart Live Proxy Engine</p>
                 </div>
             </div>
             
@@ -77,9 +77,9 @@
                 <button onclick="toggleStatsModal(true)" class="px-2 py-1 text-[11px] font-bold bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 rounded-lg border border-indigo-500/30 transition flex items-center gap-1">
                     <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i> <span>Thống kê</span>
                 </button>
-                <span id="data-status" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Live Online</span>
+                <span id="data-status" class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
+                    <span>Đang kết nối...</span>
                 </span>
             </div>
         </div>
@@ -269,7 +269,7 @@
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Live Online</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
             } catch (error) {
-                console.warn("Dùng dữ liệu giả lập:", error);
+                console.warn("Chuyển sang dữ liệu dự phòng:", error);
                 rawDraws = generateSyntheticData(gameType);
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>Backup Data</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20";
@@ -279,41 +279,31 @@
         }
 
         async function fetchLiveVietlott(gameType) {
-            // Thử đọc dữ liệu trực tiếp từ file data.json trong kho lưu trữ
-            const sources = [
-                `./data.json?t=${Date.now()}`,
-                `data.json?t=${Date.now()}`
+            const gameCode = gameCodeMap[gameType] || '645';
+            const vietlottUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${gameCode}&page=1&limit=50`;
+
+            // Danh sách các cổng Proxy kết nối trực tiếp đến Vietlott
+            const proxyProviders = [
+                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                (url) => url
             ];
 
-            for (const url of sources) {
+            for (let i = 0; i < proxyProviders.length; i++) {
                 try {
-                    const res = await fetch(url);
+                    const targetUrl = proxyProviders[i](vietlottUrl);
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 4000);
+
+                    const res = await fetch(targetUrl, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
                     if (res.ok) {
-                        const data = await res.json();
-                        let list = null;
-                        if (Array.isArray(data)) list = data;
-                        else if (data && data[gameType]) list = data[gameType];
-                        else if (data && data.resultList) list = data.resultList;
+                        let text = await res.text();
+                        let data = JSON.parse(text);
+                        if (typeof data === 'string') data = JSON.parse(data);
 
-                        if (list && list.length > 0) {
-                            return list.map(item => ({
-                                id: item.id || `#${item.DrawId || '0000'}`,
-                                date: item.date || item.DrawDate || new Date().toLocaleDateString('vi-VN'),
-                                numbers: item.numbers || parseVietlottNumbers(item.ResultNumbers)
-                            }));
-                        }
-                    }
-                } catch (e) {}
-            }
-
-            // Thử cổng proxy trực tiếp với header chuẩn
-            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${gameCodeMap[gameType]}&page=1&limit=50`;
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                if (res.ok) {
-                    const outer = await res.json();
-                    if (outer && outer.contents) {
-                        const data = JSON.parse(outer.contents);
                         const list = data.resultList || (Array.isArray(data) ? data : []);
                         if (list && list.length > 0) {
                             return list.map(item => ({
@@ -323,16 +313,34 @@
                             }));
                         }
                     }
+                } catch (e) {
+                    console.log(`Proxy #${i + 1} không phản hồi, thử tiếp proxy khác...`);
+                }
+            }
+
+            // Đọc tệp data.json nội bộ nếu có
+            try {
+                const localRes = await fetch(`./data.json?t=${Date.now()}`);
+                if (localRes.ok) {
+                    const localData = await localRes.json();
+                    const list = localData[gameType] || localData.resultList;
+                    if (list && list.length > 0) {
+                        return list.map(item => ({
+                            id: item.id || `#${item.DrawId || '0000'}`,
+                            date: item.date || item.DrawDate || new Date().toLocaleDateString('vi-VN'),
+                            numbers: item.numbers || parseVietlottNumbers(item.ResultNumbers)
+                        }));
+                    }
                 }
             } catch (e) {}
 
-            throw new Error("Không thể tải được dữ liệu trực tiếp.");
+            throw new Error("Tất cả proxy đều bận.");
         }
 
         function parseVietlottNumbers(str) {
             if (!str) return [1, 2, 3, 4, 5, 6];
             if (Array.isArray(str)) return str;
-            return String(str).split(/[\s,|-]+/).map(n => isNaN(n) ? n.trim() : parseInt(n, 10)).filter(Boolean);
+            return String(str).trim().split(/[\s,|-]+/).map(n => isNaN(parseInt(n, 10)) ? n.trim() : parseInt(n, 10)).filter(Boolean);
         }
 
         function generateSyntheticData(gameType) {
