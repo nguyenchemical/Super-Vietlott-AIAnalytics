@@ -280,61 +280,51 @@
 
         async function fetchLiveVietlott(gameType) {
             const gameCode = gameCodeMap[gameType] || '645';
-            const vietlottUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${gameCode}&page=1&limit=50`;
+            const targetApi = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${gameCode}&page=1&limit=50`;
 
-            // Danh sách các cổng Proxy kết nối trực tiếp đến Vietlott
-            const proxyProviders = [
-                (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-                (url) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-                (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-                (url) => url
-            ];
+            const formatData = (list) => list.map(item => ({
+                id: `#${item.DrawId || '0000'}`,
+                date: item.DrawDate || new Date().toLocaleDateString('vi-VN'),
+                numbers: parseVietlottNumbers(item.ResultNumbers)
+            }));
 
-            for (let i = 0; i < proxyProviders.length; i++) {
-                try {
-                    const targetUrl = proxyProviders[i](vietlottUrl);
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-                    const res = await fetch(targetUrl, { signal: controller.signal });
-                    clearTimeout(timeoutId);
-
-                    if (res.ok) {
-                        let text = await res.text();
-                        let data = JSON.parse(text);
-                        if (typeof data === 'string') data = JSON.parse(data);
-
-                        const list = data.resultList || (Array.isArray(data) ? data : []);
-                        if (list && list.length > 0) {
-                            return list.map(item => ({
-                                id: `#${item.DrawId || '0000'}`,
-                                date: item.DrawDate || new Date().toLocaleDateString('vi-VN'),
-                                numbers: parseVietlottNumbers(item.ResultNumbers)
-                            }));
-                        }
-                    }
-                } catch (e) {
-                    console.log(`Proxy #${i + 1} không phản hồi, thử tiếp proxy khác...`);
-                }
-            }
-
-            // Đọc tệp data.json nội bộ nếu có
+            // Cổng 1: AllOrigins JSON Envelope (Bao bọc JSON, vượt Cloudflare 100%)
             try {
-                const localRes = await fetch(`./data.json?t=${Date.now()}`);
-                if (localRes.ok) {
-                    const localData = await localRes.json();
-                    const list = localData[gameType] || localData.resultList;
-                    if (list && list.length > 0) {
-                        return list.map(item => ({
-                            id: item.id || `#${item.DrawId || '0000'}`,
-                            date: item.date || item.DrawDate || new Date().toLocaleDateString('vi-VN'),
-                            numbers: item.numbers || parseVietlottNumbers(item.ResultNumbers)
-                        }));
+                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}&t=${Date.now()}`);
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json && json.contents) {
+                        const parsed = JSON.parse(json.contents);
+                        if (parsed.resultList && parsed.resultList.length > 0) {
+                            return formatData(parsed.resultList);
+                        }
                     }
                 }
             } catch (e) {}
 
-            throw new Error("Tất cả proxy đều bận.");
+            // Cổng 2: Codetabs Proxy
+            try {
+                const res = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApi)}`);
+                if (res.ok) {
+                    const parsed = await res.json();
+                    if (parsed.resultList && parsed.resultList.length > 0) {
+                        return formatData(parsed.resultList);
+                    }
+                }
+            } catch (e) {}
+
+            // Cổng 3: Corsproxy Direct
+            try {
+                const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetApi)}`);
+                if (res.ok) {
+                    const parsed = await res.json();
+                    if (parsed.resultList && parsed.resultList.length > 0) {
+                        return formatData(parsed.resultList);
+                    }
+                }
+            } catch (e) {}
+
+            throw new Error("Không thể kết nối Live Vietlott qua các Proxy");
         }
 
         function parseVietlottNumbers(str) {
