@@ -1,0 +1,32 @@
+name: Sync Vietlott Live Data
+
+on:
+  schedule:
+    - cron: '0 12 * * *'   # Chạy lúc 19:00 giờ Việt Nam (sau khi quay thưởng)
+    - cron: '30 12 * * *'  # Chạy lại lúc 19:30 giờ Việt Nam
+  workflow_dispatch:       # Cho phép bấm nút chạy thủ công từ tab Actions
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Cài đặt Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Tải dữ liệu Vietlott
+        run: python scripts/fetch_vietlott.py
+
+      - name: Cập nhật dữ liệu vào Repo
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/*.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update Vietlott live data" && git push)
