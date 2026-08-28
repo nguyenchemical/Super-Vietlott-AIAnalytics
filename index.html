@@ -11,7 +11,7 @@
     <link rel="dns-prefetch" href="https://unpkg.com">
     <meta name="theme-color" content="#0f172a">
 
-    <!-- Cấu hình Manifest & App Icon -->
+    <!-- Cấu hình Manifest & App Icon (Giữ nguyên) -->
     <link rel="manifest" href="manifest.json">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -139,7 +139,7 @@
                 </select>
             </div>
 
-            <!-- Thuật toán AI (Mặc định Time Series Tensor) -->
+            <!-- Thuật toán AI -->
             <div class="bg-slate-800/80 border border-slate-700/80 p-2 rounded-xl shrink-0">
                 <label class="block text-[10px] font-bold uppercase text-slate-400 mb-1 flex items-center gap-1">
                     <i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i> Thuật toán AI Model
@@ -296,7 +296,7 @@
 
         const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // TẢI DỮ LIỆU THỜI GIAN THỰC ONLINE 100%
+        // TẢI DỮ LIỆU THỜI GIAN THỰC ONLINE 100% (GitHub Repository & Fallback CORS Proxy)
         async function initApp() {
             const gameType = document.getElementById('game-type').value;
             const statusEl = document.getElementById('data-status');
@@ -306,10 +306,10 @@
 
             try {
                 rawDraws = await fetchRealVietlottData(gameType);
-                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Online Live API</span>`;
+                statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Online Live Data</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
             } catch (error) {
-                console.warn("Chuyển sang bộ dữ liệu ngẫu nhiên dự phòng:", error);
+                console.warn("Lỗi tải Live API, kích hoạt bộ dữ liệu dự phòng:", error);
                 rawDraws = generateSyntheticData(gameType);
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><span>Data Backup</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20";
@@ -319,31 +319,56 @@
         }
 
         async function fetchRealVietlottData(gameType) {
+            // Đọc dữ liệu từ file JSON trong GitHub Repo: data/[gameType].json
+            const repoDataUrl = `./data/${gameType}.json?cache=${Date.now()}`;
+            
+            try {
+                const resRepo = await fetch(repoDataUrl);
+                if (resRepo.ok) {
+                    const dataRepo = await resRepo.json();
+                    if (Array.isArray(dataRepo) && dataRepo.length > 0) {
+                        return normalizeDrawData(dataRepo, gameType);
+                    }
+                    if (dataRepo.resultList && dataRepo.resultList.length > 0) {
+                        return normalizeDrawData(dataRepo.resultList, gameType);
+                    }
+                }
+            } catch (e) {
+                console.warn("Chưa tìm thấy file tĩnh local repo, thử tải từ Live Proxy...");
+            }
+
+            // Proxy trực tiếp đến API Vietlott làm dự phòng
             const code = VIETLOTT_GAME_CODES[gameType] || '645';
             const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
             const response = await fetch(proxyUrl, { cache: 'no-cache' });
-            if (!response.ok) throw new Error("Không kết nối được server Vietlott");
+            if (!response.ok) throw new Error("Không thể kết nối đến máy chủ Vietlott");
 
             const data = await response.json();
             if (!data || !data.resultList || data.resultList.length === 0) {
-                throw new Error("Dữ liệu rỗng");
+                throw new Error("Dữ liệu trống");
             }
 
-            return data.resultList.map(item => {
+            return normalizeDrawData(data.resultList, gameType);
+        }
+
+        function normalizeDrawData(list, gameType) {
+            return list.map(item => {
                 let parsedNumbers = [];
-                if (typeof item.ResultNumbers === 'string') {
-                    parsedNumbers = item.ResultNumbers.split(/[\s,|-]+/).map(n => n.trim()).filter(Boolean);
+                const rawNums = item.ResultNumbers || item.numbers || item.result || [];
+                
+                if (typeof rawNums === 'string') {
+                    parsedNumbers = rawNums.split(/[\s,|-]+/).map(n => n.trim()).filter(Boolean);
                     if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
                         parsedNumbers = parsedNumbers.map(n => parseInt(n, 10));
                     }
-                } else if (Array.isArray(item.ResultNumbers)) {
-                    parsedNumbers = item.ResultNumbers;
+                } else if (Array.isArray(rawNums)) {
+                    parsedNumbers = rawNums;
                 }
 
                 return {
-                    id: `#${item.DrawId || item.id || '0000'}`,
+                    id: `#${item.DrawId || item.id || item.period || '0000'}`,
                     date: item.DrawDate || item.date || new Date().toLocaleDateString('vi-VN'),
                     numbers: parsedNumbers
                 };
@@ -525,7 +550,6 @@
             const statusEl = document.getElementById('training-status');
             const progressEl = document.getElementById('training-progress');
             const gameType = document.getElementById('game-type').value;
-            const algoType = document.getElementById('algo-type').value;
 
             if (!rawDraws || rawDraws.length < 2) {
                 alert("Dữ liệu chưa tải xong hoặc không đủ để huấn luyện!");
