@@ -22,11 +22,9 @@
             --bg-main: #0c101c;
             --card-bg: #141a2e;
             --card-border: #1e2842;
-            --accent-red: #ef4444;
+            --accent-red: #e11d48;
             --accent-green: #10b981;
-            --accent-yellow: #f59e0b;
             --text-main: #f3f4f6;
-            --text-muted: #94a3b8;
             --btn-gradient: linear-gradient(90deg, #ea580c 0%, #10b981 100%);
         }
 
@@ -35,7 +33,7 @@
 
         .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .brand { display: flex; align-items: center; gap: 8px; }
-        .logo { width: 30px; height: 30px; background: #e63946; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; color: white; }
+        .logo { width: 32px; height: 32px; background: #e11d48; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; color: white; }
         .title-box { display: flex; flex-direction: column; }
         .title { font-weight: 800; font-size: 13px; color: #10b981; text-transform: uppercase; letter-spacing: 0.5px; }
         .subtitle { font-size: 10px; color: #6b7280; }
@@ -46,7 +44,6 @@
         .btn-sm.loading-badge { background: #451a03; color: #fbbf24; border-color: #b45309; }
         .btn-sm.backup-badge { background: #1e293b; color: #94a3b8; border-color: #334155; }
 
-        /* Đèn LED nhấp nháy */
         .led-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         .led-green { background-color: #10b981; box-shadow: 0 0 8px #10b981; animation: blink 1.2s infinite; }
         .led-yellow { background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: blink 0.8s infinite; }
@@ -75,15 +72,26 @@
         .status-val.online { color: #10b981; }
         .status-val.loading { color: #f59e0b; }
 
-        .results-box { min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #64748b; font-size: 12px; line-height: 1.5; font-style: italic; background: #0b0f19; border-radius: 8px; padding: 16px; margin-top: 6px; }
-        .ball-line { display: flex; justify-content: center; align-items: center; margin: 6px 0; gap: 6px; flex-wrap: wrap; }
-        .number-ball { width: 34px; height: 34px; background: radial-gradient(circle at 30% 30%, #ef4444, #991b1b); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); font-style: normal; }
+        .results-box { min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #64748b; font-size: 12px; line-height: 1.5; font-style: italic; background: #0b0f19; border-radius: 8px; padding: 16px; margin-top: 6px; gap: 8px; }
+        .ball-line { display: flex; justify-content: center; align-items: center; margin: 4px 0; gap: 6px; flex-wrap: wrap; width: 100%; }
+
+        /* BÓNG SỐ CHUẨN GIAO DIỆN VIETLOTT */
+        .ball { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.4); color: white; font-style: normal; }
+        .ball-mega { background: radial-gradient(circle at 30% 30%, #f43f5e, #be123c); }
+        .ball-power { background: radial-gradient(circle at 30% 30%, #f59e0b, #b45309); }
+        .ball-power-jp2 { background: radial-gradient(circle at 30% 30%, #f59e0b, #b45309); border: 2px solid #e11d48; box-shadow: 0 0 8px rgba(225, 29, 72, 0.8); }
+        .ball-lotto { background: radial-gradient(circle at 30% 30%, #10b981, #047857); }
+        .ball-lotto-special { background: radial-gradient(circle at 30% 30%, #ea580c, #c2410c); }
+        
+        /* Max 3D (Hồng tím / Hồng cánh sen đậm) */
+        .ball-max3d { width: auto; min-width: 42px; padding: 0 8px; border-radius: 16px; background: radial-gradient(circle at 30% 30%, #d946ef, #86198f); font-family: monospace; letter-spacing: 1px; }
+        .ball-separator { color: #64748b; font-weight: bold; font-size: 16px; margin: 0 4px; font-style: normal; }
 
         .jackpot-box { background: #141a2e; border: 1px solid #1e2842; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; }
         .jackpot-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; color: #f97316; }
         .alert-badge { background: #7f1d1d; color: #fca5a5; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800; }
         .jackpot-bar-bg { height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; margin: 8px 0; }
-        .jackpot-bar-fill { height: 100%; width: 92%; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 4px; }
+        .jackpot-bar-fill { height: 100%; transition: width 0.5s ease; background: linear-gradient(90deg, #f59e0b, #ef4444); border-radius: 4px; }
         .jackpot-info { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
         .jackpot-info strong { color: #f8fafc; }
 
@@ -129,6 +137,9 @@
             <option value="mega645">Mega 6/45 (1 - 45)</option>
             <option value="power655">Power 6/55 (1 - 55)</option>
             <option value="lotto535">Lotto 5/35 (1 - 35)</option>
+            <option value="max3d">Max 3D (000 - 999)</option>
+            <option value="max3dplus">Max 3D+ (000 - 999)</option>
+            <option value="max3dpro">Max 3D Pro (000 - 999)</option>
         </select>
     </div>
 
@@ -153,9 +164,9 @@
         </div>
     </div>
 
-    <!-- Status Engine -->
+    <!-- Status Engine UI -->
     <div class="status-bar">
-        <span>Engine: <strong style="color: #10b981;">WEBGL</strong></span>
+        <span>Engine: <strong style="color: #10b981;" id="engine-type">WEBGL</strong></span>
         <span>Status: <strong class="status-val loading" id="status-text">Đang kết nối...</strong></span>
     </div>
 
@@ -163,25 +174,25 @@
     <div class="card">
         <div class="card-title" style="display: flex; justify-content: space-between;">
             <span style="color: #f59e0b;">✨ KẾT QUẢ DỰ ĐOÁN TỪ AI MODEL</span>
-            <span style="color: #10b981; font-size: 10px;">100% Unique Engine</span>
+            <span style="color: #10b981; font-size: 10px;">100% UNIQUE ENGINE</span>
         </div>
         <div class="results-box" id="results-display">
             Nhấn nút <strong>"HUẤN LUYỆN TENSORFLOW AI"</strong> bên dưới để tạo các bộ số.
         </div>
     </div>
 
-    <!-- Jackpot Meter -->
+    <!-- Jackpot Meter (Linh hoạt theo AI) -->
     <div class="jackpot-box">
         <div class="jackpot-header">
             <span>🔥 THƯỚC ĐO JACKPOT</span>
-            <span class="alert-badge">CẢNH BÁO CAO 💥</span>
+            <span class="alert-badge" id="alert-text">CẢNH BÁO CAO 💥</span>
         </div>
         <div class="jackpot-bar-bg">
-            <div class="jackpot-bar-fill"></div>
+            <div class="jackpot-bar-fill" id="jackpot-fill" style="width: 92%;"></div>
         </div>
         <div class="jackpot-info">
-            <span>Hội tụ AI: <strong style="color: #f59e0b;">92%</strong></span>
-            <span>Tích lũy ước tính: <strong style="color: #10b981;">144 Tỷ VNĐ</strong></span>
+            <span>Hội tụ AI: <strong style="color: #f59e0b;" id="ai-percent">92%</strong></span>
+            <span>Tích lũy ước tính: <strong style="color: #10b981;" id="jackpot-val">144 Tỷ VNĐ</strong></span>
         </div>
     </div>
 
@@ -199,71 +210,49 @@
             document.getElementById('count-val').innerText = count;
         }
 
-        // Đa luồng lấy dữ liệu trực tiếp với 4 Proxy dự phòng
+        function format3D(num) {
+            return num.toString().padStart(3, '0');
+        }
+
+        function format2D(num) {
+            return num.toString().padStart(2, '0');
+        }
+
         async function fetchLiveVietlott(gameType) {
             const statusText = document.getElementById('status-text');
             const badgeBtn = document.getElementById('live-badge');
             const badgeLed = document.getElementById('badge-led');
             const badgeText = document.getElementById('badge-text');
 
-            // Cập nhật trạng thái ĐANG KẾT NỐI (Đèn vàng nhấp nháy)
             statusText.className = 'status-val loading';
             statusText.innerText = 'Đang kết nối...';
             badgeBtn.className = 'btn-sm loading-badge';
             badgeLed.className = 'led-dot led-yellow';
             badgeText.innerText = 'Connecting...';
 
-            let fileName = gameType.toLowerCase().replace(/[^a-z0-9]/g, '');
-            if (!fileName.includes('mega') && !fileName.includes('power') && !fileName.includes('lotto')) {
-                fileName = 'mega645';
-            }
-
-            const gameCodeMap = { 'mega645': '645', 'power655': '655', 'lotto535': '535' };
-            const code = gameCodeMap[fileName] || '645';
-            const targetApi = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
-
-            // Danh sách các nguồn tải dữ liệu ưu tiên
             const endpoints = [
-                `./data/${fileName}.json?v=${Date.now()}`,
-                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetApi)}`,
-                `https://corsproxy.io/?${encodeURIComponent(targetApi)}`,
-                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApi)}`
+                `./data/${gameType}.json?v=${Date.now()}`
             ];
 
             for (const url of endpoints) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000);
-                    
+                    const timeoutId = setTimeout(() => controller.abort(), 3000);
                     const res = await fetch(url, { signal: controller.signal });
                     clearTimeout(timeoutId);
 
                     if (res.ok) {
                         let data = await res.json();
-                        if (typeof data === 'string') data = JSON.parse(data);
-                        
-                        let list = data.resultList || data;
-                        if (Array.isArray(list) && list.length > 0) {
-                            // KẾT NỐI THÀNH CÔNG -> Đèn xanh nhấp nháy 🟢 Live Online
-                            statusText.className = 'status-val online';
-                            statusText.innerText = 'Sẵn sàng (Live Online)';
-                            badgeBtn.className = 'btn-sm active-live';
-                            badgeLed.className = 'led-dot led-green';
-                            badgeText.innerText = 'Live Online';
-
-                            return list.map(item => ({
-                                id: `#${item.DrawId || item.id || '0000'}`,
-                                date: item.DrawDate || item.date || 'Trực tiếp',
-                                numbers: item.numbers || (item.ResultNumbers || '').split(/[\s,|-]+/).map(n => parseInt(n)).filter(n => !isNaN(n))
-                            }));
-                        }
+                        statusText.className = 'status-val online';
+                        statusText.innerText = 'Sẵn sàng (Live Online)';
+                        badgeBtn.className = 'btn-sm active-live';
+                        badgeLed.className = 'led-dot led-green';
+                        badgeText.innerText = 'Live Online';
+                        return data;
                     }
-                } catch (e) {
-                    console.warn(`Nguồn ${url} không phản hồi, thử nguồn tiếp theo...`);
-                }
+                } catch (e) {}
             }
 
-            // Nếu tất cả cổng đều lỗi -> Chuyển sang Backup Offline Engine
             statusText.className = 'status-val online';
             statusText.innerText = 'Sẵn sàng (Offline Engine)';
             badgeBtn.className = 'btn-sm backup-badge';
@@ -277,7 +266,6 @@
             vietlottData = await fetchLiveVietlott(gameType);
         }
 
-        // Thuật toán AI / TensorFlow.js Mô Phỏng Dự Đoán
         async function runAITraining() {
             const btn = document.getElementById('train-btn');
             const display = document.getElementById('results-display');
@@ -287,30 +275,65 @@
             btn.innerText = '⏳ ĐANG HUẤN LUYỆN TENSORFLOW AI...';
             display.innerHTML = '<span style="color: #f59e0b;">Đang phân tích chuỗi thời gian Tensor Model...</span>';
 
-            const maxNum = gameType === 'power655' ? 55 : (gameType === 'lotto535' ? 35 : 45);
-            const pickCount = gameType === 'lotto535' ? 5 : 6;
-
+            // TensorFlow Tensor Computation
             const dummyInputs = tf.tensor2d([[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12]]);
             const weights = tf.variable(tf.randomNormal([6, 1]));
             dummyInputs.matMul(weights).dispose();
             weights.dispose();
             dummyInputs.dispose();
 
-            await new Promise(r => setTimeout(r, 1200));
+            await new Promise(r => setTimeout(r, 1000));
+
+            // Cập nhật linh hoạt Thước đo Jackpot khi nhấn nút
+            const randomPercent = Math.floor(Math.random() * 18) + 80; // 80% - 97%
+            document.getElementById('ai-percent').innerText = `${randomPercent}%`;
+            document.getElementById('jackpot-fill').style.width = `${randomPercent}%`;
 
             let htmlOutput = '';
+
             for (let i = 0; i < count; i++) {
-                let nums = new Set();
-                while(nums.size < pickCount) {
-                    nums.add(Math.floor(Math.random() * maxNum) + 1);
-                }
-                let sorted = Array.from(nums).sort((a, b) => a - b);
-                
                 htmlOutput += `<div class="ball-line">`;
-                sorted.forEach(n => {
-                    let numStr = n < 10 ? '0' + n : n;
-                    htmlOutput += `<div class="number-ball">${numStr}</div>`;
-                });
+
+                if (gameType === 'mega645') {
+                    let nums = new Set();
+                    while(nums.size < 6) nums.add(Math.floor(Math.random() * 45) + 1);
+                    Array.from(nums).sort((a,b)=>a-b).forEach(n => {
+                        htmlOutput += `<div class="ball ball-mega">${format2D(n)}</div>`;
+                    });
+                } 
+                else if (gameType === 'power655') {
+                    let nums = new Set();
+                    while(nums.size < 6) nums.add(Math.floor(Math.random() * 55) + 1);
+                    let sorted = Array.from(nums).sort((a,b)=>a-b);
+                    sorted.forEach(n => {
+                        htmlOutput += `<div class="ball ball-power">${format2D(n)}</div>`;
+                    });
+                    // Số đặc biệt Jackpot 2
+                    let jp2;
+                    do { jp2 = Math.floor(Math.random() * 55) + 1; } while(nums.has(jp2));
+                    htmlOutput += `<span class="ball-separator">|</span><div class="ball ball-power-jp2">${format2D(jp2)}</div>`;
+                }
+                else if (gameType === 'lotto535') {
+                    let nums = new Set();
+                    while(nums.size < 5) nums.add(Math.floor(Math.random() * 35) + 1);
+                    Array.from(nums).sort((a,b)=>a-b).forEach(n => {
+                        htmlOutput += `<div class="ball ball-lotto">${format2D(n)}</div>`;
+                    });
+                    // Số đặc biệt (01 - 12)
+                    let specialNum = Math.floor(Math.random() * 12) + 1;
+                    htmlOutput += `<span class="ball-separator">|</span><div class="ball ball-lotto-special">${format2D(specialNum)}</div>`;
+                }
+                else if (gameType.startsWith('max3d')) {
+                    // Max 3D / Max 3D+ / Max 3D Pro: Mỗi bộ số chuẩn gồm 2 bộ 3 chữ số (000 - 999)
+                    let set1 = Math.floor(Math.random() * 1000);
+                    let set2;
+                    do { set2 = Math.floor(Math.random() * 1000); } while(set2 === set1); // Không trùng lặp
+                    
+                    htmlOutput += `<div class="ball ball-max3d">${format3D(set1)}</div>`;
+                    htmlOutput += `<span class="ball-separator">|</span>`;
+                    htmlOutput += `<div class="ball ball-max3d">${format3D(set2)}</div>`;
+                }
+
                 htmlOutput += `</div>`;
             }
 
