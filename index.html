@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VIETLOTT TENSORFLOW AI</title>
 
-    <!-- PWA & Icon Config (Giữ nguyên cho Android & iOS) -->
+    <!-- PWA & Icon Config -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
@@ -40,7 +40,22 @@
         .title { font-weight: 800; font-size: 13px; color: #10b981; text-transform: uppercase; letter-spacing: 0.5px; }
         .subtitle { font-size: 10px; color: #6b7280; }
         .header-btns { display: flex; gap: 6px; }
-        .btn-sm { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 4px 10px; border-radius: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        
+        .btn-sm { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 4px 10px; border-radius: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; }
+        .btn-sm.active-live { background: #064e3b; color: #34d399; border-color: #059669; }
+        .btn-sm.loading-badge { background: #451a03; color: #fbbf24; border-color: #b45309; }
+        .btn-sm.backup-badge { background: #1e293b; color: #94a3b8; border-color: #334155; }
+
+        /* Đèn LED nhấp nháy */
+        .led-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .led-green { background-color: #10b981; box-shadow: 0 0 8px #10b981; animation: blink 1.2s infinite; }
+        .led-yellow { background-color: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: blink 0.8s infinite; }
+        .led-blue { background-color: #3b82f6; }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.85); }
+        }
 
         .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px; margin-bottom: 12px; }
         .card-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
@@ -89,7 +104,10 @@
         </div>
         <div class="header-btns">
             <button class="btn-sm">📊 Thống kê</button>
-            <button class="btn-sm active">🔹 Backup Data</button>
+            <button class="btn-sm loading-badge" id="live-badge">
+                <span class="led-dot led-yellow" id="badge-led"></span>
+                <span id="badge-text">Đang kết nối...</span>
+            </button>
         </div>
     </div>
 
@@ -181,58 +199,76 @@
             document.getElementById('count-val').innerText = count;
         }
 
-        // 1. Tải dữ liệu Vietlott ưu tiên từ tệp JSON do GitHub Actions tạo
+        // Đa luồng lấy dữ liệu trực tiếp với 4 Proxy dự phòng
         async function fetchLiveVietlott(gameType) {
             const statusText = document.getElementById('status-text');
+            const badgeBtn = document.getElementById('live-badge');
+            const badgeLed = document.getElementById('badge-led');
+            const badgeText = document.getElementById('badge-text');
+
+            // Cập nhật trạng thái ĐANG KẾT NỐI (Đèn vàng nhấp nháy)
             statusText.className = 'status-val loading';
-            statusText.innerText = 'Đang tải dữ liệu...';
+            statusText.innerText = 'Đang kết nối...';
+            badgeBtn.className = 'btn-sm loading-badge';
+            badgeLed.className = 'led-dot led-yellow';
+            badgeText.innerText = 'Connecting...';
 
             let fileName = gameType.toLowerCase().replace(/[^a-z0-9]/g, '');
             if (!fileName.includes('mega') && !fileName.includes('power') && !fileName.includes('lotto')) {
                 fileName = 'mega645';
             }
 
-            // Thử lấy tệp tĩnh cục bộ trước
-            try {
-                const res = await fetch(`./data/${fileName}.json?v=${Date.now()}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data) && data.length > 0) {
-                        statusText.className = 'status-val online';
-                        statusText.innerText = 'Sẵn sàng (Live Online)';
-                        return data;
-                    }
-                }
-            } catch (e) {
-                console.warn("Không tìm thấy tệp tĩnh, chuyển sang dùng Proxy...");
-            }
-
-            // Dự phòng dùng AllOrigins Proxy
             const gameCodeMap = { 'mega645': '645', 'power655': '655', 'lotto535': '535' };
             const code = gameCodeMap[fileName] || '645';
             const targetApi = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
 
-            try {
-                const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetApi)}&t=${Date.now()}`);
-                if (res.ok) {
-                    const json = await res.json();
-                    if (json && json.contents) {
-                        const parsed = JSON.parse(json.contents);
-                        if (parsed.resultList) {
+            // Danh sách các nguồn tải dữ liệu ưu tiên
+            const endpoints = [
+                `./data/${fileName}.json?v=${Date.now()}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetApi)}`,
+                `https://corsproxy.io/?${encodeURIComponent(targetApi)}`,
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetApi)}`
+            ];
+
+            for (const url of endpoints) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 4000);
+                    
+                    const res = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timeoutId);
+
+                    if (res.ok) {
+                        let data = await res.json();
+                        if (typeof data === 'string') data = JSON.parse(data);
+                        
+                        let list = data.resultList || data;
+                        if (Array.isArray(list) && list.length > 0) {
+                            // KẾT NỐI THÀNH CÔNG -> Đèn xanh nhấp nháy 🟢 Live Online
                             statusText.className = 'status-val online';
-                            statusText.innerText = 'Sẵn sàng (Proxy Online)';
-                            return parsed.resultList.map(item => ({
-                                id: `#${item.DrawId || '0000'}`,
-                                date: item.DrawDate || 'Trực tiếp',
-                                numbers: (item.ResultNumbers || '').split(/[\s,|-]+/).map(n => parseInt(n)).filter(n => !isNaN(n))
+                            statusText.innerText = 'Sẵn sàng (Live Online)';
+                            badgeBtn.className = 'btn-sm active-live';
+                            badgeLed.className = 'led-dot led-green';
+                            badgeText.innerText = 'Live Online';
+
+                            return list.map(item => ({
+                                id: `#${item.DrawId || item.id || '0000'}`,
+                                date: item.DrawDate || item.date || 'Trực tiếp',
+                                numbers: item.numbers || (item.ResultNumbers || '').split(/[\s,|-]+/).map(n => parseInt(n)).filter(n => !isNaN(n))
                             }));
                         }
                     }
+                } catch (e) {
+                    console.warn(`Nguồn ${url} không phản hồi, thử nguồn tiếp theo...`);
                 }
-            } catch (e) {}
+            }
 
+            // Nếu tất cả cổng đều lỗi -> Chuyển sang Backup Offline Engine
             statusText.className = 'status-val online';
             statusText.innerText = 'Sẵn sàng (Offline Engine)';
+            badgeBtn.className = 'btn-sm backup-badge';
+            badgeLed.className = 'led-dot led-blue';
+            badgeText.innerText = 'Backup Data';
             return [];
         }
 
@@ -241,7 +277,7 @@
             vietlottData = await fetchLiveVietlott(gameType);
         }
 
-        // 2. Thuật toán AI / TensorFlow.js Mô Phỏng Dự Đoán
+        // Thuật toán AI / TensorFlow.js Mô Phỏng Dự Đoán
         async function runAITraining() {
             const btn = document.getElementById('train-btn');
             const display = document.getElementById('results-display');
@@ -254,7 +290,6 @@
             const maxNum = gameType === 'power655' ? 55 : (gameType === 'lotto535' ? 35 : 45);
             const pickCount = gameType === 'lotto535' ? 5 : 6;
 
-            // Mô phỏng tính toán bằng TensorFlow Tensor
             const dummyInputs = tf.tensor2d([[1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12]]);
             const weights = tf.variable(tf.randomNormal([6, 1]));
             dummyInputs.matMul(weights).dispose();
@@ -284,7 +319,6 @@
             btn.innerText = '⚙️ HUẤN LUYỆN TENSORFLOW AI';
         }
 
-        // Khởi tạo ban đầu
         window.addEventListener('DOMContentLoaded', () => {
             onGameChange();
         });
