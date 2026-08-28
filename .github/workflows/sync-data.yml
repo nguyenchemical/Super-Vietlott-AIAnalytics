@@ -3,7 +3,6 @@ name: Sync Vietlott Live Data
 on:
   schedule:
     - cron: '0 12 * * *'
-    - cron: '30 12 * * *'
   workflow_dispatch:
 
 permissions:
@@ -21,6 +20,9 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Cài đặt thư viện
+        run: pip install requests
+
       - name: Tải dữ liệu Vietlott
         run: python scripts/fetch_vietlott.py
 
@@ -33,5 +35,5 @@ jobs:
             git commit -m "Auto-update Vietlott live data"
             git push
           else
-            echo "Không có dữ liệu mới để cập nhật."
+            echo "Dữ liệu không có thay đổi."
           fi
