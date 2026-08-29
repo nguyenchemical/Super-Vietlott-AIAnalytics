@@ -290,7 +290,7 @@
 
             try {
                 rawDraws = await fetchRealVietlottData(gameType);
-                if (!rawDraws || rawDraws.length < 2) throw new Error("Dữ liệu nhận về quá ít");
+                if (!rawDraws || rawDraws.length < 1) throw new Error("Dữ liệu nhận về quá ít");
                 
                 statusEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Online Live Data</span>`;
                 statusEl.className = "inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
@@ -305,17 +305,15 @@
         }
 
         async function fetchRealVietlottData(gameType) {
-            // Thử đọc dữ liệu tĩnh trong repo
             try {
                 const resRepo = await fetch(`data/${gameType}.json?t=${Date.now()}`);
                 if (resRepo.ok) {
                     const dataRepo = await resRepo.json();
                     const list = Array.isArray(dataRepo) ? dataRepo : (dataRepo.resultList || []);
-                    if (list.length >= 2) return normalizeDrawData(list, gameType);
+                    if (list.length >= 1) return normalizeDrawData(list, gameType);
                 }
             } catch (e) {}
 
-            // Fallback sang API
             const code = VIETLOTT_GAME_CODES[gameType] || '645';
             const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
@@ -324,9 +322,10 @@
             if (!response.ok) throw new Error("API Proxy Error");
 
             const data = await response.json();
-            if (!data || !data.resultList || data.resultList.length < 2) throw new Error("API Data Empty");
+            const list = Array.isArray(data) ? data : (data.resultList || []);
+            if (!list || list.length < 1) throw new Error("API Data Empty");
 
-            return normalizeDrawData(data.resultList, gameType);
+            return normalizeDrawData(list, gameType);
         }
 
         function normalizeDrawData(list, gameType) {
@@ -527,8 +526,7 @@
             const progressEl = document.getElementById('training-progress');
             const gameType = document.getElementById('game-type').value;
 
-            // Kiểm tra và tự khởi tạo dữ liệu dự phòng nếu cần
-            if (!rawDraws || rawDraws.length < 2) {
+            if (!rawDraws || rawDraws.length < 1) {
                 rawDraws = generateSyntheticData(gameType);
             }
 
@@ -546,7 +544,11 @@
             const inputs = [];
             const labels = [];
 
-            if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
+            if (rawDraws.length < 2) {
+                const dummyInputs = new Array(maxNum).fill(0.1);
+                inputs.push(dummyInputs);
+                labels.push(dummyInputs);
+            } else if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
                 for (let i = 0; i < rawDraws.length - 1; i++) {
                     const currentDraw = rawDraws[i].numbers;
                     const nextDraw = rawDraws[i+1].numbers;
