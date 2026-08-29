@@ -135,7 +135,8 @@
                     <i data-lucide="cpu" class="w-3 h-3 text-indigo-400"></i> Thuật toán AI Model
                 </label>
                 <select id="algo-type" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-1.5 text-xs font-medium focus:ring-1 focus:ring-red-500 outline-none text-slate-200">
-                    <option value="tf-lstm" selected>Time Series Tensor Pattern Model</option>
+                    <option value="markov-chain" selected>Markov Chain Probability Model</option>
+                    <option value="tf-lstm">Time Series Tensor Pattern Model</option>
                     <option value="tf-dense">Fast Light Deep Neural Network</option>
                 </select>
             </div>
@@ -253,7 +254,6 @@
         let timerInterval = null;
         let currentTicketCount = 2;
 
-        // Mã API Vietlott chuẩn hóa chính xác
         const VIETLOTT_GAME_CODES = {
             'mega645': '645',
             'power655': '655',
@@ -335,8 +335,6 @@
         function normalizeDrawData(list, gameType) {
             return list.map(item => {
                 let parsedNumbers = [];
-                
-                // Trích xuất JSON phẳng
                 const jsonStr = JSON.stringify(item);
                 const matches = jsonStr.match(/\d+/g) || [];
 
@@ -349,7 +347,6 @@
                     else parsedNumbers = parsedNumbers.slice(0, 7);
 
                 } else if (gameType.startsWith('max3d')) {
-                    // Xử lý thông minh tách các chuỗi 3 chữ số cho Max 3D
                     let digitsOnly = matches.join('');
                     let triplets = [];
                     for (let i = 0; i <= digitsOnly.length - 3; i += 3) {
