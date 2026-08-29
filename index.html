@@ -253,12 +253,13 @@
         let timerInterval = null;
         let currentTicketCount = 2;
 
+        // Mã API Vietlott chuẩn hóa chính xác
         const VIETLOTT_GAME_CODES = {
             'mega645': '645',
             'power655': '655',
-            'max3d': '3d',
-            'max3dplus': '3dplus',
-            'max3dpro': '3dpro',
+            'max3d': '3D',
+            'max3dplus': '3D+',
+            'max3dpro': '3DPRO',
             'lotto535': '535'
         };
 
@@ -310,12 +311,15 @@
                 if (resRepo.ok) {
                     const dataRepo = await resRepo.json();
                     const list = Array.isArray(dataRepo) ? dataRepo : (dataRepo.resultList || dataRepo.list || dataRepo.data || []);
-                    if (list.length >= 1) return normalizeDrawData(list, gameType);
+                    if (list.length >= 1) {
+                        const parsed = normalizeDrawData(list, gameType);
+                        if (parsed.length >= 1) return parsed;
+                    }
                 }
             } catch (e) {}
 
             const code = VIETLOTT_GAME_CODES[gameType] || '645';
-            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${code}&page=1&limit=50`;
+            const targetUrl = `https://vietlott.vn/api/front/kew-result-game-list?gameType=${encodeURIComponent(code)}&page=1&limit=50`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
             const response = await fetch(proxyUrl, { cache: 'no-cache' });
@@ -332,43 +336,30 @@
             return list.map(item => {
                 let parsedNumbers = [];
                 
-                // Trích xuất mảng/chuỗi kết quả thô từ mọi cấu trúc key của API Vietlott
-                let rawNums = item.ResultNumbers || item.numbers || item.result || item.Results || item.Result || [];
-
-                // Xử lý đệ quy/flatten mảng để bóc tách Max 3D nằm trong mảng lồng nhau
-                function extractStrings(input) {
-                    let acc = [];
-                    if (typeof input === 'string' || typeof input === 'number') {
-                        acc.push(String(input));
-                    } else if (Array.isArray(input)) {
-                        input.forEach(sub => {
-                            acc = acc.concat(extractStrings(sub));
-                        });
-                    } else if (typeof input === 'object' && input !== null) {
-                        Object.values(input).forEach(val => {
-                            acc = acc.concat(extractStrings(val));
-                        });
-                    }
-                    return acc;
-                }
-
-                const extracted = extractStrings(rawNums);
-                
-                // Tách số theo ký tự phân cách
-                extracted.forEach(str => {
-                    const tokens = str.split(/[\s,|-]+/).map(n => n.trim()).filter(Boolean);
-                    parsedNumbers.push(...tokens);
-                });
+                // Trích xuất JSON phẳng
+                const jsonStr = JSON.stringify(item);
+                const matches = jsonStr.match(/\d+/g) || [];
 
                 if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
-                    parsedNumbers = parsedNumbers.map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+                    parsedNumbers = matches
+                        .map(n => parseInt(n, 10))
+                        .filter(n => n >= 1 && n <= (gameType === 'power655' ? 55 : (gameType === 'mega645' ? 45 : 35)));
+
+                    if (gameType === 'lotto535') parsedNumbers = parsedNumbers.slice(0, 6);
+                    else parsedNumbers = parsedNumbers.slice(0, 7);
+
                 } else if (gameType.startsWith('max3d')) {
-                    // Lọc lấy các chuỗi 3 chữ số cho Max 3D
-                    parsedNumbers = parsedNumbers.map(n => n.padStart(3, '0')).filter(n => /^\d{3}$/.test(n));
-                    if (gameType === 'max3d' && parsedNumbers.length > 0) {
-                        parsedNumbers = [parsedNumbers[0]];
-                    } else if (parsedNumbers.length >= 2) {
-                        parsedNumbers = parsedNumbers.slice(0, 2);
+                    // Xử lý thông minh tách các chuỗi 3 chữ số cho Max 3D
+                    let digitsOnly = matches.join('');
+                    let triplets = [];
+                    for (let i = 0; i <= digitsOnly.length - 3; i += 3) {
+                        triplets.push(digitsOnly.substring(i, i + 3));
+                    }
+                    
+                    if (gameType === 'max3d') {
+                        parsedNumbers = triplets.slice(0, 1);
+                    } else {
+                        parsedNumbers = triplets.slice(0, 2);
                     }
                 }
 
