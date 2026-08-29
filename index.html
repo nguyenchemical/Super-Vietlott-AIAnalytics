@@ -309,7 +309,7 @@
                 const resRepo = await fetch(`data/${gameType}.json?t=${Date.now()}`);
                 if (resRepo.ok) {
                     const dataRepo = await resRepo.json();
-                    const list = Array.isArray(dataRepo) ? dataRepo : (dataRepo.resultList || []);
+                    const list = Array.isArray(dataRepo) ? dataRepo : (dataRepo.resultList || dataRepo.list || dataRepo.data || []);
                     if (list.length >= 1) return normalizeDrawData(list, gameType);
                 }
             } catch (e) {}
@@ -322,7 +322,7 @@
             if (!response.ok) throw new Error("API Proxy Error");
 
             const data = await response.json();
-            const list = Array.isArray(data) ? data : (data.resultList || []);
+            const list = Array.isArray(data) ? data : (data.resultList || data.list || data.data || []);
             if (!list || list.length < 1) throw new Error("API Data Empty");
 
             return normalizeDrawData(list, gameType);
@@ -331,32 +331,50 @@
         function normalizeDrawData(list, gameType) {
             return list.map(item => {
                 let parsedNumbers = [];
-                const rawNums = item.ResultNumbers || item.numbers || item.result || [];
                 
-                if (typeof rawNums === 'string') {
-                    parsedNumbers = rawNums.split(/[\s,|-]+/).map(n => n.trim()).filter(Boolean);
-                    if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
-                        parsedNumbers = parsedNumbers.map(n => parseInt(n, 10));
+                // Trích xuất mảng/chuỗi kết quả thô từ mọi cấu trúc key của API Vietlott
+                let rawNums = item.ResultNumbers || item.numbers || item.result || item.Results || item.Result || [];
+
+                // Xử lý đệ quy/flatten mảng để bóc tách Max 3D nằm trong mảng lồng nhau
+                function extractStrings(input) {
+                    let acc = [];
+                    if (typeof input === 'string' || typeof input === 'number') {
+                        acc.push(String(input));
+                    } else if (Array.isArray(input)) {
+                        input.forEach(sub => {
+                            acc = acc.concat(extractStrings(sub));
+                        });
+                    } else if (typeof input === 'object' && input !== null) {
+                        Object.values(input).forEach(val => {
+                            acc = acc.concat(extractStrings(val));
+                        });
                     }
-                } else if (Array.isArray(rawNums)) {
-                    parsedNumbers = rawNums.map(n => String(n).trim()).filter(Boolean);
-                    if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
-                        parsedNumbers = parsedNumbers.map(n => parseInt(n, 10));
-                    }
+                    return acc;
                 }
 
-                // Đảm bảo Max 3D luôn lấy ít nhất 1-2 bộ số 3 chữ số
-                if (gameType.startsWith('max3d') && parsedNumbers.length > 0) {
-                    if (gameType === 'max3d') {
+                const extracted = extractStrings(rawNums);
+                
+                // Tách số theo ký tự phân cách
+                extracted.forEach(str => {
+                    const tokens = str.split(/[\s,|-]+/).map(n => n.trim()).filter(Boolean);
+                    parsedNumbers.push(...tokens);
+                });
+
+                if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
+                    parsedNumbers = parsedNumbers.map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+                } else if (gameType.startsWith('max3d')) {
+                    // Lọc lấy các chuỗi 3 chữ số cho Max 3D
+                    parsedNumbers = parsedNumbers.map(n => n.padStart(3, '0')).filter(n => /^\d{3}$/.test(n));
+                    if (gameType === 'max3d' && parsedNumbers.length > 0) {
                         parsedNumbers = [parsedNumbers[0]];
-                    } else {
+                    } else if (parsedNumbers.length >= 2) {
                         parsedNumbers = parsedNumbers.slice(0, 2);
                     }
                 }
 
                 return {
-                    id: `#${item.DrawId || item.id || item.period || '0000'}`,
-                    date: item.DrawDate || item.date || new Date().toLocaleDateString('vi-VN'),
+                    id: `#${item.DrawId || item.id || item.period || item.Period || '0000'}`,
+                    date: item.DrawDate || item.date || item.Date || new Date().toLocaleDateString('vi-VN'),
                     numbers: parsedNumbers
                 };
             }).filter(d => d.numbers && d.numbers.length > 0);
