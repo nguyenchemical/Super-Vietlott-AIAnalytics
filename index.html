@@ -339,7 +339,19 @@
                         parsedNumbers = parsedNumbers.map(n => parseInt(n, 10));
                     }
                 } else if (Array.isArray(rawNums)) {
-                    parsedNumbers = rawNums;
+                    parsedNumbers = rawNums.map(n => String(n).trim()).filter(Boolean);
+                    if (['mega645', 'power655', 'lotto535'].includes(gameType)) {
+                        parsedNumbers = parsedNumbers.map(n => parseInt(n, 10));
+                    }
+                }
+
+                // Đảm bảo Max 3D luôn lấy ít nhất 1-2 bộ số 3 chữ số
+                if (gameType.startsWith('max3d') && parsedNumbers.length > 0) {
+                    if (gameType === 'max3d') {
+                        parsedNumbers = [parsedNumbers[0]];
+                    } else {
+                        parsedNumbers = parsedNumbers.slice(0, 2);
+                    }
                 }
 
                 return {
